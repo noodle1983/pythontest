@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TableData>
+	<FieldDef>
+		<Field name='name' type='string'>name</Field>
+		<Field name='value' type='enum'>
+			<map value='1'>1:commont</map>
+		</Field>
+	</FieldDef>
+	<Records>
+		<Record name='ludong' value='1'/>
+	</Records>
+</TableData>

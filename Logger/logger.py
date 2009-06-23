@@ -1,0 +1,23 @@
+# logger.py
+import logging
+import logging.config
+from os import path
+
+logger = None
+
+def getLogger():
+	configFilePath = path.dirname (path.realpath(__file__)) + '/logging.conf'
+	logging.config.fileConfig(configFilePath)
+	global logger
+	logger = logging.getLogger("example")
+	return logger
+
+if __name__ == '__main__':
+	logger = getLogger()
+	logger.debug("debug message")
+	logger.info("info message")
+	logger.warn("warn message")
+	logger.error("error message")
+	logger.critical("critical message")
+
+

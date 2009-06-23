@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Window>
+	<MenuBar>
+		<Menu name="File">
+			<Item name="print" action='TestCommand'>
+			</Item>
+			<Item/>
+			<Item name="exit" action='ExitCommand'/>
+		</Menu>
+		<Menu name="Help">
+			<Item name="about"/>
+		</Menu>
+	</MenuBar>
+	<StatusBar>
+		<Item size='-2' text='Ready'/>
+		<Item size='-3' text='Welcome'/>
+	</StatusBar>
+	<ToolBar width='16' height='16'>
+		<Item name="print" action='TestCommand' bitmap='ART_INFORMATION' longHelp='longHelp'/>
+		<Item/>
+		<Item name="exit" action='ExitCommand' bitmap='ART_QUIT' longHelp='longHelp'/>
+	</ToolBar>
+</Window>

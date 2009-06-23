@@ -1,0 +1,10 @@
+[2009-03-02 21:34:15,265 DEBUG    logger.py 15] debug message
+[2009-03-02 21:34:15,265 INFO     logger.py 16] info message
+[2009-03-02 21:34:15,265 WARNING  logger.py 17] warn message
+[2009-03-02 21:34:15,265 ERROR    logger.py 18] error message
+[2009-03-02 21:34:15,265 CRITICAL logger.py 19] critical message
+[2009-03-02 22:04:55,312 DEBUG    logger.py 17] debug message
+[2009-03-02 22:04:55,312 INFO     logger.py 18] info message
+[2009-03-02 22:04:55,312 WARNING  logger.py 19] warn message
+[2009-03-02 22:04:55,312 ERROR    logger.py 20] error message
+[2009-03-02 22:04:55,312 CRITICAL logger.py 21] critical message
