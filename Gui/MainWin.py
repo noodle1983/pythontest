@@ -33,11 +33,21 @@ class MainWin(wx.Frame):
 
 		self._tb = ConfToolBar(self, curPath)
 
+		self._mgr.AddPane(self._tb, wx.aui.AuiPaneInfo().Name("tb1").Caption("test"). ToolbarPane().Top().Row(1).LeftDockable(False).RightDockable(False))
+		self._mgr.GetPane("tb1").Show()
+
 		self._creatStatusBar()
 
-		self._panel = ConfTablePanel(self)
-		self._mgr.AddPane(self._panel, self._panel.getPanelInfo())
+		#self._panel = ConfTablePanel(self)
+		#self._mgr.AddPane(self._panel, self._panel.getPanelInfo())
 		self._mgr.Update()
+
+	def GetDockArt(self):
+		return self._mgr.GetArtProvider()
+
+	def DoUpdate(self):
+		self._mgr.Update()
+
 
 	def _creatStatusBar(self):
 		confStatusBar = self._config.find('StatusBar')
