@@ -34,7 +34,8 @@ class TcpServer:
 				self._logger.debug("new connection from :" + str(addr))
 				self._connectionPool.append(addr, con)	
 			except  socket.timeout :
-				self._logger.warning('timeout')
+				pass
+
 		self._logger.debug("[run]Server Stop!")
 
 	def shutdown(self):
@@ -60,7 +61,8 @@ if __name__ == "__main__":
 	tcpServer = TcpServer(log, None, cp.ConnectionPool(log))
 	tcpServer.startAt('4080')
 	import time 
-	time.sleep(20)
+	while True:
+		time.sleep(20)
 
 	tcpServer.shutdown()
 
