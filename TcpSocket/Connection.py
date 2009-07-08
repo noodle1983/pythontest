@@ -64,7 +64,7 @@ if __name__ == '__main__':
 	import NetworkObj
 
 	con = Connection(logger.getLogger())
-	con.connect('150.236.80.149', 8765)
+	con.connect('localhost', 4080)
 	data = array.array('c', '0' * 100)
 	
 	totalLen = NetworkObj.Uint32("TotalLen", 100)

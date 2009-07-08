@@ -12,6 +12,21 @@ def getLogger():
 	logger = logging.getLogger("example")
 	return logger
 
+def debug(str):
+	getLogger().debug(str)
+
+def info(str):
+	getLogger().info(str)
+
+def warn(str):
+	getLogger().warn(str)
+
+def error(str):
+	getLogger().error(str)
+
+def critical(str):
+	getLogger().critical(str)
+
 if __name__ == '__main__':
 	logger = getLogger()
 	logger.debug("debug message")
