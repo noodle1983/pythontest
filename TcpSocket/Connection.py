@@ -2,6 +2,7 @@
 import threading
 import socket
 import time
+import array
 
 class Connection:
 	
@@ -32,6 +33,7 @@ class Connection:
 			try:
 				if self._status == 'started' and self._sock is not None:
 					buf = self._sock.recv(1024)
+					self._logger.info(("len:" , len(buf))) 
 					self._logger.info(buf)
 					self.write(buf)
 				time.sleep(1)
@@ -60,8 +62,19 @@ if __name__ == '__main__':
 	sys.path.append(os.getcwd() + '/../')
 	sys.path.append(os.getcwd() + '/')
 	import Logger.logger as logger
+	import NetworkObj
 
 	con = Connection(logger.getLogger())
 	con.connect('localhost', 4080)
-	con.write("hello world!")
+	data = array.array('c', '0' * 1024)
+	
+	totalLen = NetworkObj.Uint32("TotalLen")
+	commandId = NetworkObj.Uint32("CommandId")
+	sequenceId = NetworkObj.Uint32("sequenceId")
+	SccpPort = NetworkObj.Uint16("SccpPort")
+	DccaPort = NetworkObj.Uint16("DccaPort")
+	VacPort = NetworkObj.Uint16("VacPort")
+	instance = NetworkObj.Uint16("instance")
+
+	con.write(data)
 	time.sleep(10)
