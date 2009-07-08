@@ -33,9 +33,8 @@ class Connection:
 			try:
 				if self._status == 'started' and self._sock is not None:
 					buf = self._sock.recv(1024)
-					self._logger.info(("len:" , len(buf))) 
-					self._logger.info(buf)
-					self.write(buf)
+					if len(buf):
+						self._logger.info(("len:" , len(buf))) 
 				time.sleep(1)
 			except socket.timeout:
 				pass
@@ -65,16 +64,38 @@ if __name__ == '__main__':
 	import NetworkObj
 
 	con = Connection(logger.getLogger())
-	con.connect('localhost', 4080)
-	data = array.array('c', '0' * 1024)
+	con.connect('150.236.80.149', 8765)
+	data = array.array('c', '0' * 100)
 	
-	totalLen = NetworkObj.Uint32("TotalLen")
-	commandId = NetworkObj.Uint32("CommandId")
-	sequenceId = NetworkObj.Uint32("sequenceId")
-	SccpPort = NetworkObj.Uint16("SccpPort")
-	DccaPort = NetworkObj.Uint16("DccaPort")
-	VacPort = NetworkObj.Uint16("VacPort")
-	instance = NetworkObj.Uint16("instance")
+	totalLen = NetworkObj.Uint32("TotalLen", 100)
+	commandId = NetworkObj.Uint32("CommandId", 0x11111002)
+	sequenceId = NetworkObj.Uint32("sequenceId", 1)
+	SccpPort = NetworkObj.Uint16("SccpPort", 4080)
+	DccaPort = NetworkObj.Uint16("DccaPort", 4081)
+	VacPort = NetworkObj.Uint16("VacPort", 4082)
+	instance = NetworkObj.Char("instance", 2, '5')
+	ipAddress = NetworkObj.Char("ipAddress", 20, '150.236.80.166')
+	identity = NetworkObj.Char("identity", 60, 'isp.ericsson.com')
 
+	index = 0
+	index = totalLen.toStream(data, index) 
+	print index 
+	index = commandId.toStream(data, index) 
+	print index 
+	index = sequenceId.toStream(data, index) 
+	print index 
+	index = SccpPort.toStream(data, index) 
+	print index 
+	index = DccaPort.toStream(data, index) 
+	print index 
+	index = VacPort.toStream(data, index) 
+	print index 
+	index = instance.toStream(data, index) 
+	print index 
+	index = ipAddress.toStream(data, index) 
+	print index 
+	index = identity.toStream(data, index)
+	print index 
+	
 	con.write(data)
 	time.sleep(10)
