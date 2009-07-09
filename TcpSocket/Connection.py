@@ -63,7 +63,7 @@ if __name__ == '__main__':
 	import Logger.logger as logger
 	import NetworkObj
 
-	con = Connection(logger.getLogger())
+	con = Connection(logger.Logger())
 	con.connect('localhost', 4080)
 	data = array.array('c', '0' * 100)
 	
