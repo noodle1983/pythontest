@@ -4,6 +4,11 @@ import threading
 import string
 from Connection import Connection
 
+import sys
+import os
+sys.path.append(os.getcwd() + '/../')
+from Processor.Processor import Processor
+
 class TcpServer:
 	def __init__(self, logger, protocol, connectionPool):
 		self._logger = logger 
