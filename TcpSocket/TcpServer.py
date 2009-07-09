@@ -57,7 +57,7 @@ if __name__ == "__main__":
 	sys.path.append(os.getcwd() + '/')
 	import Logger.logger as logger
 	import ConnectionPool as cp
-	log = logger.getLogger()
+	log = logger.Logger()
 	tcpServer = TcpServer(log, None, cp.ConnectionPool(log))
 	tcpServer.startAt('4080')
 	import time 

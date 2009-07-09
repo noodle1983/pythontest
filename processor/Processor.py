@@ -5,7 +5,7 @@ import sys
 import os
 sys.path.append(os.getcwd() + '/../')
 sys.path.append(os.getcwd() + '/')
-import Logger.logger as logger
+from Logger.logger import Logger 
 
 class Processor:
 	
@@ -14,7 +14,7 @@ class Processor:
 		self._threads = []
 		self._lock = threading.RLock()
 		self._actionQueue = []
-		for i in xrange(5):
+		for i in xrange(nThread):
 			self._threads.append(threading.Thread(target=self.svc))
 
 	
@@ -29,7 +29,7 @@ class Processor:
 			thread.join()
 
 	def process(self, action):
-		logger.debug('[process]' + action.toString())
+		Logger().debug('[process]' + action.toString())
 		with self._lock:
 			self._actionQueue.append(action)
 
@@ -41,7 +41,7 @@ class Processor:
 					continue
 				action = self._actionQueue.pop(0)	
 			action.run()	
-		logger.debug("[svc] stop.")
+		Logger().debug("[svc] stop.")
 
 if __name__ == '__main__':
 	from Action import Action as Action
@@ -49,3 +49,4 @@ if __name__ == '__main__':
 	p.start()
 	p.process(Action())
 	p.stop()
+	raw_input("put any key to exit.")	
