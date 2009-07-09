@@ -29,7 +29,6 @@ class Processor:
 			thread.join()
 
 	def process(self, action):
-		Logger().debug('[process]' + action.toString())
 		with self._lock:
 			self._actionQueue.append(action)
 
@@ -40,13 +39,13 @@ class Processor:
 					time.sleep(1)
 					continue
 				action = self._actionQueue.pop(0)	
-			action.run()	
+			action()	
 		Logger().debug("[svc] stop.")
 
 if __name__ == '__main__':
 	from Action import Action as Action
 	p = Processor(2)
 	p.start()
-	p.process(Action())
+	p.process(Action().run)
 	p.stop()
 	raw_input("put any key to exit.")	
