@@ -5,27 +5,12 @@ from os import path
 
 logger = None
 
-def getLogger():
+def Logger():
 	configFilePath = path.dirname (path.realpath(__file__)) + '/logging.conf'
 	logging.config.fileConfig(configFilePath)
 	global logger
 	logger = logging.getLogger("example")
 	return logger
-
-def debug(str):
-	getLogger().debug(str)
-
-def info(str):
-	getLogger().info(str)
-
-def warn(str):
-	getLogger().warn(str)
-
-def error(str):
-	getLogger().error(str)
-
-def critical(str):
-	getLogger().critical(str)
 
 if __name__ == '__main__':
 	logger = getLogger()
