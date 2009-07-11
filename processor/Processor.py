@@ -28,6 +28,10 @@ class Processor:
 		for thread in self._threads:
 			thread.join()
 
+	def processList(self, actionList):
+		with self._lock:
+			self._actionQueue += actionList
+
 	def process(self, action):
 		with self._lock:
 			self._actionQueue.append(action)
@@ -47,5 +51,6 @@ if __name__ == '__main__':
 	p = Processor(2)
 	p.start()
 	p.process(Action().run)
+	p.processList([Action().run, Action().run])
 	p.stop()
 	raw_input("put any key to exit.")	
