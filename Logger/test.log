@@ -8,3 +8,28 @@
 [2009-03-02 22:04:55,312 WARNING  logger.py 19] warn message
 [2009-03-02 22:04:55,312 ERROR    logger.py 20] error message
 [2009-03-02 22:04:55,312 CRITICAL logger.py 21] critical message
+2009-07-12 20:05:13,092 DEBUG   [logger.py:17] debug message
+2009-07-12 20:05:13,138 INFO    [logger.py:18] info message
+2009-07-12 20:05:13,138 WARNING [logger.py:19] warn message
+2009-07-12 20:05:13,138 ERROR   [logger.py:20] error message
+2009-07-12 20:05:13,138 CRITICAL [logger.py:21] critical message
+2009-07-12 20:16:50,747 DEBUG   [logger.py:25] debug message
+2009-07-12 20:16:50,779 INFO    [logger.py:26] info message
+2009-07-12 20:16:50,779 WARNING [logger.py:27] warn message
+2009-07-12 20:16:50,779 ERROR   [logger.py:28] error message
+2009-07-12 20:16:50,795 CRITICAL [logger.py:29] critical message
+2009-07-12 20:16:50,795 DEBUG   [logger.py:32] debug message
+2009-07-12 20:16:50,795 INFO    [logger.py:33] info message
+2009-07-12 20:16:50,795 WARNING [logger.py:34] warn message
+2009-07-12 20:16:50,795 ERROR   [logger.py:35] error message
+2009-07-12 20:16:50,795 CRITICAL [logger.py:36] critical message
+2009-07-12 20:17:26,622 DEBUG   [logger.py:25] debug message
+2009-07-12 20:17:26,670 INFO    [logger.py:26] info message
+2009-07-12 20:17:26,670 WARNING [logger.py:27] warn message
+2009-07-12 20:17:26,670 ERROR   [logger.py:28] error message
+2009-07-12 20:17:26,670 CRITICAL [logger.py:29] critical message
+2009-07-12 20:17:26,670 DEBUG   [logger.py:32] debug message
+2009-07-12 20:17:26,670 INFO    [logger.py:33] info message
+2009-07-12 20:17:26,670 WARNING [logger.py:34] warn message
+2009-07-12 20:17:26,670 ERROR   [logger.py:35] error message
+2009-07-12 20:17:26,670 CRITICAL [logger.py:36] critical message

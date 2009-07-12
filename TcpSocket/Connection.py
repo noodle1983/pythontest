@@ -105,7 +105,7 @@ if __name__ == '__main__':
 	import Logger.logger as logger
 	import NetworkObj
 
-	con = Connection(logger.Logger())
+	con = Connection(logger.ConsoleLogger())
 	con.connect('localhost', 4080)
 	data = array.array('c', '0' * 100)
 	
@@ -141,4 +141,5 @@ if __name__ == '__main__':
 
 	for i in range(10000):
 		con.write(data)
-	time.sleep(10)
+
+	raw_input("input any key to quit.")
