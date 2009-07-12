@@ -13,7 +13,7 @@ def Logger():
 	return logger
 
 if __name__ == '__main__':
-	logger = getLogger()
+	logger = Logger()
 	logger.debug("debug message")
 	logger.info("info message")
 	logger.warn("warn message")
