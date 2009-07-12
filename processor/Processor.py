@@ -19,14 +19,17 @@ class Processor:
 
 	
 	def start(self):
+		self._status = 'start'
 		for thread in self._threads:
 			thread.start()
 		self._status = 'started'
 
 	def stop(self):
 		self._status = 'stop'
-		for thread in self._threads:
-			thread.join()
+		if self._status == 'started':
+			for thread in self._threads:
+				thread.join()
+		self._status = 'stopped'
 
 	def processList(self, actionList):
 		with self._lock:

@@ -33,13 +33,5 @@ class ConnectionPool:
 
 	def clean(self):
 		while self._status != 'stop':
-			for addr in self._connections:
-				if self._connections[addr]._status != 'stop':
-					continue
-
-				with self._connections[addr]._lock:
-					del self._connections[addr]
-				
-				self._logger.debug("[clean]delete addr:" + str(addr))
-
+			self._connections = dict([(k, v) for (k, v) in self._connections.items() if v._status == 'stopped'])
 			time.sleep(1)	

@@ -4,18 +4,40 @@ import socket
 import time
 import array
 
+import sys
+import os
+sys.path.append(os.getcwd() + '/../')
+from processor.Processor import Processor
+import Logger.logger as logger
+
 class Connection:
 	
-	def __init__(self, logger, sock = None, addr = None, status = 'started'):
+	def __init__(self, logger = logger.Logger(), sock = None, addr = None, status = 'started', sniffer = None):
 		self._status = status
-		self._lock = threading.RLock()
 		self._sock = sock		
 		self._logger = logger
 		self._addr = addr
+		self._sniffer = sniffer
+		self._wlock = threading.RLock()
+		self._writeQueue = []
+		self._readProcessor = Processor()
+		self._writeProcessor = Processor()
+
 		if self._sock:
 			self._sock.settimeout(1)
-		self._thread = threading.Thread(target=self.read)
-		self._thread.start()
+			self.__startToHandleMsg()	
+
+		#self._thread = threading.Thread(target=self.read)
+		#self._thread.start()
+
+	def __startToHandleMsg(self):
+		if self._sniffer:
+			self._sniffer.registSock(self._sock, self.read, self.writeImpl, self.shutdown)
+		else:
+			self._readProcessor.start()
+			self._readProcessor.process(self.read)
+			self._writeProcessor.start()
+			self._writeProcessor.process(self.writeImpl)
 
 	def connect(self, host, port):
 		self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,34 +45,54 @@ class Connection:
 		self._sock.connect(self._addr)
 		self._status = 'started'	
 		self._sock.settimeout(1)
+		self.__startToHandleMsg()
 
 	def stop(self):
-		self._status = 'stoped'
+		self._status = 'stopped'
 		self._sock.close()
 		
 	def read(self):
-		while True:
+		while self._status != 'stopped':
 			try:
-				if self._status == 'started' and self._sock is not None:
+				if self._sock is not None:
 					buf = self._sock.recv(1024)
-					if len(buf):
-						self._logger.info(("len:" , len(buf))) 
-				time.sleep(1)
+					self._logger.debug("[read]bufLen:%d" % len(buf))
+					self.write(buf)
 			except socket.timeout:
-				pass
+				if self._sniffer:
+					return self._sniffer.registSock(self._sock, self.read, None, None)
+			except socket.error:
+				return self.shutdown()
+
 		print "recv done"
 
-
-
 	def write(self, buf):
-		self._sock.send(buf)
+		with self._wlock:
+			self._writeQueue.append(buf)
 
+	def writeImpl(self):
+		while self._status != 'stopped':
+			with self._wlock: 
+				if len(self._writeQueue) > 0: 
+					buf = self._writeQueue.pop(0)
+					self.__send(buf)	
+				else:
+					if self._sniffer:
+						return self._sniffer.registSock(self._sock, None, self.writeImpl, None)
+					time.sleep(1)	
+
+	def __send(self, buf):
+		try:
+			self._sock.send(buf)
+		except socket.error:
+			return self.shutdown()
 
 	def shutdown(self):
 		self._logger.debug("[shutdown]" + str(self._addr) + "...")
-		with self._lock:
-			self._sock.close()
-			self._status = 'stop'
+		self._sock.close()
+		self._readProcessor.stop()
+		self._writeProcessor.stop()
+		self._status = 'stopped'
 		self._logger.debug("[shutdown]" + str(self._addr) + "!")
 
 
@@ -96,6 +138,7 @@ if __name__ == '__main__':
 	print index 
 	index = identity.toStream(data, index)
 	print index 
-	
-	con.write(data)
+
+	for i in range(10000):
+		con.write(data)
 	time.sleep(10)

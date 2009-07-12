@@ -2,28 +2,38 @@
 import socket
 import threading
 import string
-from Connection import Connection
 
 import sys
 import os
 sys.path.append(os.getcwd() + '/../')
-from Processor.Processor import Processor
+from processor.Processor import Processor
+from ConnectionPool import ConnectionPool
+from Connection import Connection
+import Logger.logger as logger
 
 class TcpServer:
-	def __init__(self, logger, protocol, connectionPool):
+	def __init__(self, protocol = None, logger = logger.Logger(), connectionPool = ConnectionPool(logger.Logger())\
+	, sniffer = None):
 		self._logger = logger 
 		self._connectionPool = connectionPool
 		self._protocol = protocol
 		self._status = 'running'
+		self._sniffer = sniffer
+		self._processor = Processor()
 
 	def startAt(self, port): 
-		self._logger.info("start at:" + port)
+		self._logger.debug("start at:" + port)
 		self._port = string.atoi(port)
 
 		self.init()
-		
-		self._thread = threading.Thread(target=self.run)
-		self._thread.start()
+		if self._sniffer is None:	
+			#self._thread = threading.Thread(target=self.run)
+			#self._thread.start()
+			self._processor.start()
+			self._processor.process(self.run)
+		else:
+			self._sniffer.registSock(self._socket, self.run, None, self.shutdown)
+
 
 	def init(self):
 		self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -35,35 +45,32 @@ class TcpServer:
 		while self._status == 'running':
 			try:
 				sock, addr = self._socket.accept()
-				con = Connection(self._logger, sock, addr)
+				con = Connection(logger=self._logger, sock=sock, addr=addr, sniffer=None)
 				self._logger.debug("new connection from :" + str(addr))
 				self._connectionPool.append(addr, con)	
 			except  socket.timeout :
-				pass
+				if self._sniffer:
+					return self._sniffer.registSock(self._socket, self.run, None, self.shutdown)
+			except  socket.error:
+				self.shutdown()
+				break
 
 		self._logger.debug("[run]Server Stop!")
 
 	def shutdown(self):
 		self._logger.debug("[shutdown]...")
 		self._status = 'stop'
-		self._connectionPool.shutdown()
-		self._thread.join()
 		self._socket.close()
+		self._processor.stop()
 		self._logger.debug("[shutdown]!")
 
 	def restart(self, port):
-		pass
+		self._logger.debug("[restart]...")
+		self.shutdown()
+		self.startAt(self._port)
 
 if __name__ == "__main__":
-	import sys
-	import os
-	sys.path.append(os.getcwd() + '/../../')
-	sys.path.append(os.getcwd() + '/../')
-	sys.path.append(os.getcwd() + '/')
-	import Logger.logger as logger
-	import ConnectionPool as cp
-	log = logger.Logger()
-	tcpServer = TcpServer(log, None, cp.ConnectionPool(log))
+	tcpServer = TcpServer()
 	tcpServer.startAt('4080')
 	import time 
 	while True:
