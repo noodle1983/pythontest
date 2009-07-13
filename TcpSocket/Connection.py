@@ -12,7 +12,7 @@ import Logger.logger as logger
 
 class Connection:
 	
-	def __init__(self, logger = logger.Logger(), sock = None, addr = None, status = 'started', sniffer = None):
+	def __init__(self, logger, sock = None, addr = None, status = 'started', sniffer = None):
 		self._status = status
 		self._sock = sock		
 		self._logger = logger
@@ -56,7 +56,7 @@ class Connection:
 			try:
 				if self._sock is not None:
 					buf = self._sock.recv(1024)
-					self._logger.debug("[read]bufLen:%d" % len(buf))
+					self._logger.debug("[read]bufLen:%d" % (len(buf)))
 					self.write(buf)
 			except socket.timeout:
 				if self._sniffer:
@@ -69,6 +69,7 @@ class Connection:
 	def write(self, buf):
 		with self._wlock:
 			self._writeQueue.append(buf)
+			self._logger.debug("[write]queueLen:%d" % (len(self._writeQueue)))
 
 	def writeImpl(self):
 		while self._status != 'stopped':
@@ -83,8 +84,9 @@ class Connection:
 
 	def __send(self, buf):
 		try:
-			self._sock.send(buf)
-		except socket.error:
+			self._sock.sendall(buf)
+		except socket.error, e:
+			self._logger.warning("[__send]%s" % e)
 			return self.shutdown()
 
 	def shutdown(self):
@@ -105,7 +107,7 @@ if __name__ == '__main__':
 	import Logger.logger as logger
 	import NetworkObj
 
-	con = Connection(logger.ConsoleLogger())
+	con = Connection(logger=logger.ConsoleLogger())
 	con.connect('localhost', 4080)
 	data = array.array('c', '0' * 100)
 	

@@ -78,7 +78,6 @@ if __name__ == '__main__' :
 
 	from TcpServer import TcpServer
 	import ConnectionPool as cp
-	log = logger.Logger()
 	tcpServer = TcpServer(sniffer=sniffer)
 	tcpServer.startAt('4080')
 	
