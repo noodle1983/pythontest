@@ -33,3 +33,13 @@
 2009-07-12 20:17:26,670 WARNING [logger.py:34] warn message
 2009-07-12 20:17:26,670 ERROR   [logger.py:35] error message
 2009-07-12 20:17:26,670 CRITICAL [logger.py:36] critical message
+2009-07-14 23:01:55,453 DEBUG   [logger.py:26] debug message
+2009-07-14 23:01:55,483 INFO    [logger.py:27] info message
+2009-07-14 23:01:55,483 WARNING [logger.py:28] warn message
+2009-07-14 23:01:55,483 ERROR   [logger.py:29] error message
+2009-07-14 23:01:55,483 CRITICAL [logger.py:30] critical message
+2009-07-14 23:01:55,483 DEBUG   [logger.py:33] debug message
+2009-07-14 23:01:55,483 INFO    [logger.py:34] info message
+2009-07-14 23:01:55,483 WARNING [logger.py:35] warn message
+2009-07-14 23:01:55,483 ERROR   [logger.py:36] error message
+2009-07-14 23:01:55,483 CRITICAL [logger.py:37] critical message

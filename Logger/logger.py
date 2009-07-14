@@ -2,6 +2,7 @@
 import logging
 import logging.config
 from os import path
+import cloghandler
 
 logger = None
 consoleLogger = None
