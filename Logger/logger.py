@@ -2,7 +2,7 @@
 import logging
 import logging.config
 from os import path
-import cloghandler
+import timednamefilehandler
 
 logger = None
 consoleLogger = None
