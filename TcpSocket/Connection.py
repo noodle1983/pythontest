@@ -57,7 +57,7 @@ class Connection:
 				if self._sock is not None:
 					buf = self._sock.recv(1024)
 					self._logger.debug("[read]bufLen:%d" % (len(buf)))
-					self.write(buf)
+					#self.write(buf)
 			except socket.timeout:
 				if self._sniffer:
 					return self._sniffer.registSock(self._sock, self.read, None, None)
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 	import Logger.logger as logger
 	import NetworkObj
 
-	con = Connection(logger=logger.ConsoleLogger())
+	con = Connection(logger=logger.Logger())
 	con.connect('localhost', 4080)
 	data = array.array('c', '0' * 100)
 	

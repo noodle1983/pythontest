@@ -30,11 +30,11 @@ if __name__ == '__main__':
 	logger.critical("critical message")
 
 	logger = Logger()
-	logger.debug("debug message")
-	logger.info("info message")
-	logger.warn("warn message")
-	logger.error("error message")
-	logger.critical("critical message")
+	logger.debug("debug message2")
+	logger.info("info message2")
+	logger.warn("warn message2")
+	logger.error("error message2")
+	logger.critical("critical message2")
 
 	logger = ConsoleLogger()
 	logger.debug("debug message")

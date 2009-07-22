@@ -67,18 +67,19 @@ if __name__ == '__main__' :
 	sys.path.append(os.getcwd() + '/../../')
 	sys.path.append(os.getcwd() + '/../')
 	sys.path.append(os.getcwd() + '/')
-	import Logger.logger as logger
+	import Logger.logger as Logger
 	from processor.Processor import Processor
 	selectProcssor = Processor()
 	selectProcssor.start()
 	feProcessor = Processor(3)
 	feProcessor.start()
-	sniffer = SockSniffer(logger.Logger(), selectProcssor, feProcessor)
+	log = Logger.Logger()
+	sniffer = SockSniffer(log, selectProcssor, feProcessor)
 	sniffer.start()
 
 	from TcpServer import TcpServer
 	import ConnectionPool as cp
-	tcpServer = TcpServer(sniffer=sniffer)
+	tcpServer = TcpServer(logger = log, sniffer=sniffer)
 	tcpServer.startAt('4080')
 	
 			

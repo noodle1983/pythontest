@@ -9,13 +9,17 @@ sys.path.append(os.getcwd() + '/../')
 from processor.Processor import Processor
 from ConnectionPool import ConnectionPool
 from Connection import Connection
-import Logger.logger as logger
+import Logger.logger as Logger
 
 class TcpServer:
-	def __init__(self, protocol = None, logger = logger.Logger(), connectionPool = ConnectionPool(logger.Logger())\
+	def __init__(self, logger, protocol = None, connectionPool = None\
 	, sniffer = None):
 		self._logger = logger 
-		self._connectionPool = connectionPool
+		if connectionPool:
+			self._connectionPool = connectionPool
+		else:
+			self._connectionPool = ConnectionPool(logger)
+
 		self._protocol = protocol
 		self._status = 'running'
 		self._sniffer = sniffer
@@ -70,7 +74,7 @@ class TcpServer:
 		self.startAt(self._port)
 
 if __name__ == "__main__":
-	tcpServer = TcpServer()
+	tcpServer = TcpServer(Logger.Logger())
 	tcpServer.startAt('4080')
 	import time 
 	while True:
