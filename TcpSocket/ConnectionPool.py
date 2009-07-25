@@ -8,6 +8,7 @@ class ConnectionPool:
 		self._connections = {} 
 		self._logger = logger
 		self._status = 'running'
+		self._size = 0
 		self._thread = threading.Thread(target=self.clean)
 		self._thread.start()
 	
@@ -16,11 +17,13 @@ class ConnectionPool:
 		con = self._connections.get(addr)
 		if con is None :
 			self._connections[addr] = connection
-		elif con._status == 'stop':
+		elif con._status == 'stopped':
 			with con._lock:
 				self._connections[addr] = connection
 		else:
-			logger.warning('[append]ignore new connection:' + str(addr)	)
+			self._logger.warning('[append]ignore new connection:' + str(addr)	)
+		self._size = len(self._connections)
+		self._logger.debug('[append]pool sizes appended:%d'% self._size)
 
 	def shutdown(self):
 		self._logger.debug('[shutdown]...')
@@ -33,5 +36,8 @@ class ConnectionPool:
 
 	def clean(self):
 		while self._status != 'stop':
-			self._connections = dict([(k, v) for (k, v) in self._connections.items() if v._status == 'stopped'])
+			self._connections = dict([(k, v) for (k, v) in self._connections.items() if v._status != 'stopped'])
+			if self._size != len(self._connections):
+				self._size = len(self._connections)
+				self._logger.debug('[clean]pool sizes after clean:%d'% self._size)
 			time.sleep(1)	

@@ -77,6 +77,7 @@ class Connection:
 				if len(self._writeQueue) > 0: 
 					buf = self._writeQueue.pop(0)
 					self.__send(buf)	
+					self._logger.debug("[writeImpl]queueLen:%d" % (len(self._writeQueue)))
 				else:
 					if self._sniffer:
 						return self._sniffer.registSock(self._sock, None, self.writeImpl, None)
@@ -104,10 +105,11 @@ if __name__ == '__main__':
 	sys.path.append(os.getcwd() + '/../../')
 	sys.path.append(os.getcwd() + '/../')
 	sys.path.append(os.getcwd() + '/')
-	import Logger.logger as logger
+	import Logger.logger as Logger
 	import NetworkObj
 
-	con = Connection(logger=logger.Logger())
+	log = Logger.Logger()
+	con = Connection(logger=log)
 	con.connect('localhost', 4080)
 	data = array.array('c', '0' * 100)
 	
@@ -141,7 +143,11 @@ if __name__ == '__main__':
 	index = identity.toStream(data, index)
 	print index 
 
-	for i in range(10000):
+	import time
+	beginTime = time.time()
+	msgCount = 100000
+	for i in range(msgCount):
 		con.write(data)
-
+	print "tps:%f"% (msgCount/(time.time() - beginTime))
+	
 	raw_input("input any key to quit.")
