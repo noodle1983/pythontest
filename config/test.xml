@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configure SYSTEM "configuration.dtd">
+<configure namespace="test">
+<config type="int">
+	<name>total len</name>
+	<desc>total len</desc>
+	<valuedef></valuedef>
+</config>
+<config type="enum">
+	<name>commandId</name>
+	<desc>command id</desc>
+	<valuedef>
+	<enum>
+		<enumitem value="0x01" desc="msg1"></enumitem>
+	</enum>
+	</valuedef>
+</config>
+
+</configure>
