@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT configure (config*)>
+<!ATTLIST configure
+	namespace CDATA #REQUIRED
+>
+
+<!ELEMENT config (name, desc, valuedef)>
+<!ATTLIST config
+	type CDATA #REQUIRED
+>
+
+<!ELEMENT name (#PCDATA)>
+
+<!ELEMENT desc (#PCDATA)>
+
+<!ELEMENT valuedef (ref?, default?, range?, enum?)>
+
+<!ELEMENT ref (#PCDATA)>
+
+<!ELEMENT default (#PCDATA)>
+
+<!ELEMENT range (#PCDATA)>
+<!ATTLIST range
+	min CDATA #REQUIRED
+>
+<!ATTLIST range
+	max CDATA #REQUIRED
+>
+
+<!ELEMENT enum (enumitem)>
+<!ELEMENT enumitem (#PCDATA)>
+<!ATTLIST enumitem
+	value CDATA #REQUIRED
+>
+<!ATTLIST enumitem
+	desc CDATA #REQUIRED
+>
