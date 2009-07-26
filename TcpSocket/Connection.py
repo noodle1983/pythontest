@@ -69,19 +69,21 @@ class Connection:
 	def write(self, buf):
 		with self._wlock:
 			self._writeQueue.append(buf)
-			self._logger.debug("[write]queueLen:%d" % (len(self._writeQueue)))
+		self._logger.debug("[write]queueLen:%d" % (len(self._writeQueue)))
 
 	def writeImpl(self):
 		while self._status != 'stopped':
-			with self._wlock: 
-				if len(self._writeQueue) > 0: 
+			if len(self._writeQueue) > 0: 
+				buf = None
+				with self._wlock: 
 					buf = self._writeQueue.pop(0)
-					self.__send(buf)	
-					self._logger.debug("[writeImpl]queueLen:%d" % (len(self._writeQueue)))
-				else:
-					if self._sniffer:
-						return self._sniffer.registSock(self._sock, None, self.writeImpl, None)
-					time.sleep(1)	
+				self._logger.debug("[writeImpl]queueLen:%d" % (len(self._writeQueue)))
+				self.__send(buf)	
+			else:
+				if self._sniffer:
+					return self._sniffer.registSock(self._sock, None, self.writeImpl, None)
+				time.sleep(0.1)	
+				continue
 
 	def __send(self, buf):
 		try:
@@ -148,6 +150,9 @@ if __name__ == '__main__':
 	msgCount = 100000
 	for i in range(msgCount):
 		con.write(data)
+
+	while len(con._writeQueue):
+		time.sleep(0.1)
 	print "tps:%f"% (msgCount/(time.time() - beginTime))
 	
 	raw_input("input any key to quit.")
