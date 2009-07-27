@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2009 (http://www.altova.com) by Noodle (EMBRACE) -->
 <!ELEMENT configure (config*)>
 <!ATTLIST configure
 	namespace CDATA #REQUIRED
 >
 <!ELEMENT config (name, desc, valuedef, config*)>
 <!ATTLIST config
-	type (int | string | ref | conplex | enum) #REQUIRED
->
+          type (int | string | ref | complex | enum) #REQUIRED
+          ctrl (normal | switch | seq | beswitch) #REQUIRED>
 <!ELEMENT name (#PCDATA)>
 <!ELEMENT desc (#PCDATA)>
-<!ELEMENT valuedef (ref?, default?, range?, enum?, maxlen?, minlen?)>
+<!ELEMENT valuedef (ref?, default?, range?, enum?, len?)>
 <!ELEMENT ref (#PCDATA)>
 <!ELEMENT default (#PCDATA)>
 <!ELEMENT range (#PCDATA)>
@@ -24,5 +23,8 @@
 	value CDATA #REQUIRED
 	desc CDATA #REQUIRED
 >
-<!ELEMENT maxlen (#PCDATA)>
-<!ELEMENT minlen (#PCDATA)>
+<!ELEMENT len (#PCDATA)>
+<!ATTLIST len
+          fix CDATA #IMPLIED
+          min CDATA #IMPLIED
+          max CDATA #IMPLIED>

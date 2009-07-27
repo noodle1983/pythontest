@@ -1,19 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configure SYSTEM "configuration.dtd">
 <configure namespace="test">
-<config type="int">
+
+<config type="int" ctrl="seq">
 	<name>total len</name>
 	<desc>total len</desc>
-	<valuedef></valuedef>
+	<valuedef/>
 </config>
-<config type="enum">
+
+<config type="enum" ctrl="switch">
 	<name>commandId</name>
 	<desc>command id</desc>
 	<valuedef>
 	<enum>
-		<enumitem value="0x01" desc="msg1"></enumitem>
+		<enumitem value="0x01" desc="msg1"/>
 	</enum>
 	</valuedef>
 </config>
 
+<config type="complex"  ctrl="beswitch">
+        <name>msg1</name>
+        <desc>msg1</desc>
+        <valuedef>
+        </valuedef>
+        <config type="int" ctrl="seq">
+          <name>SrcDeviceType</name>
+          <desc/>
+          <valuedef>
+            <default>0</default>
+            <len fix="4"></len>
+          </valuedef>
+        </config>
+        <config type="string" ctrl="seq">
+          <name>SrcDeviceId</name>
+          <desc/>
+          <valuedef>
+            <default>00000</default>
+            <len fix="16"></len>
+          </valuedef>
+        </config>
+</config>
+
 </configure>
+
+
