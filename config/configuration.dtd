@@ -5,7 +5,7 @@
 >
 <!ELEMENT config (name, desc, valuedef, config*)>
 <!ATTLIST config
-          type (int | string | ref | complex | enum) #REQUIRED
+          type (int | uint | hex | string | ref | complex | enum) #REQUIRED
           ctrl (normal | switch | seq | beswitch) #REQUIRED>
 <!ELEMENT name (#PCDATA)>
 <!ELEMENT desc (#PCDATA)>
@@ -27,4 +27,5 @@
 <!ATTLIST len
           fix CDATA #IMPLIED
           min CDATA #IMPLIED
-          max CDATA #IMPLIED>
+          max CDATA #IMPLIED
+>
