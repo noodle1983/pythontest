@@ -4,7 +4,7 @@ import re
 
 	
 
-class Int(object):
+class Config(object):
 	
 	mFirstTag = re.compile("^<.*?>")
 	mLastTag = re.compile("<.*?>$") 
