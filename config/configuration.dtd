@@ -20,7 +20,7 @@
 <!ELEMENT enum (enumitem)>
 <!ELEMENT enumitem (#PCDATA)>
 <!ATTLIST enumitem
-	value CDATA #REQUIRED
+	id CDATA #REQUIRED
 	desc CDATA #REQUIRED
 >
 <!ELEMENT len (#PCDATA)>
@@ -29,3 +29,4 @@
           min CDATA #IMPLIED
           max CDATA #IMPLIED
 >
+

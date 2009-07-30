@@ -22,6 +22,7 @@ class Element(object):
 		self.value =Element.mLastTag.sub('', Element.mFirstTag.sub('', e.toxml())) 
 		for (key, value) in e.attributes.items():
 			self.attrs[key] = value
+		return self
 
 if __name__ == '__main__':
 	root = minidom.parseString("""<config type="int" ctrl="seq">
