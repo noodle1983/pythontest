@@ -6,7 +6,9 @@
 <!ELEMENT config (name, desc, valuedef, config*)>
 <!ATTLIST config
           type (int | uint | hex | string | ref | complex | enum) #REQUIRED
-          ctrl (normal | switch | seq | beswitch) #REQUIRED>
+          ctrl (normal | switcher | seq | switchee) #REQUIRED
+          count (zero | one | many ) #REQUIRED
+>
 <!ELEMENT name (#PCDATA)>
 <!ELEMENT desc (#PCDATA)>
 <!ELEMENT valuedef (ref?, default?, range?, enum?, len?)>
@@ -29,4 +31,5 @@
           min CDATA #IMPLIED
           max CDATA #IMPLIED
 >
+
 

@@ -2,23 +2,23 @@
 <!DOCTYPE configure SYSTEM "configuration.dtd">
 <configure namespace="test">
 
-<config type="int" ctrl="seq">
+<config type="int" ctrl="seq" count="one">
 	<name>total len</name>
 	<desc>total len</desc>
 	<valuedef/>
 </config>
 
-<config type="enum" ctrl="switch">
+<config type="enum" ctrl="switcher" count="one">
 	<name>commandId</name>
 	<desc>command id</desc>
 	<valuedef>
 	<enum>
-		<enumitem value="0x01" desc="msg1"/>
+		<enumitem id="0x01" desc="msg1"></enumitem>
 	</enum>
 	</valuedef>
 </config>
 
-<config type="complex"  ctrl="beswitch">
+<config type="complex" ctrl="beswitch" count="one">
         <name>msg1</name>
         <desc>msg1</desc>
         <valuedef>
@@ -28,7 +28,7 @@
           <desc/>
           <valuedef>
             <default>0</default>
-            <len fix="4"></len>
+            <len fix="4"/>
           </valuedef>
         </config>
         <config type="string" ctrl="seq">
@@ -36,11 +36,12 @@
           <desc/>
           <valuedef>
             <default>00000</default>
-            <len fix="16"></len>
+            <len fix="16"/>
           </valuedef>
         </config>
 </config>
 
 </configure>
+
 
 
