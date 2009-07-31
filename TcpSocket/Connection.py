@@ -24,7 +24,7 @@ class Connection:
 		self._writeProcessor = Processor()
 
 		if self._sock:
-			self._sock.settimeout(3)
+			self._sock.settimeout(5)
 			self.__startToHandleMsg()	
 
 		#self._thread = threading.Thread(target=self.read)
@@ -44,7 +44,7 @@ class Connection:
 		self._addr = (host, port)
 		self._sock.connect(self._addr)
 		self._status = 'started'	
-		self._sock.settimeout(3)
+		self._sock.settimeout(5)
 		self.__startToHandleMsg()
 
 	def stop(self):
@@ -56,22 +56,27 @@ class Connection:
 			try:
 				buf = self._sock.recv(4096)
 				if len(buf) == 0:
-					raise socket.timeout
 					self._logger.debug("[read]buf:%s" % (buf))
+					raise socket.timeout
 				self._logger.debug("[read]bufLen:%d" % (len(buf)))
 				#
 				#self.write(buf)
-			except socket.timeout:
-				self._logger.debug("[read]time out!")
-				if self._sniffer:
-					return self._sniffer.registSock(self._sock, self.read, None, None)
-				time.sleep(0.1)
-			except socket.error:
-				return self.shutdown()
+			except socket.error, e:
+				if (str(e) == "timed out"):
+					self._logger.debug("[read]time out!")
+					if self._sniffer:
+						return self._sniffer.registSock(self._sock, self.read, None, None)
+					time.sleep(0.1)
+				else:
+					self._logger.debug("[read]socket.error!" + str(e))
+					return self.shutdown()
+
 
 		print "recv done"
 
 	def write(self, buf):
+		if self._status == 'stopped':
+			return -1
 		with self._wlock:
 			self._writeQueue.append(buf)
 		self._logger.debug("[write]queueLen:%d" % (len(self._writeQueue)))
@@ -93,10 +98,16 @@ class Connection:
 
 	def __send(self, buf):
 		try:
-			self._sock.sendall(buf)
+			self._sock.send(buf)
 		except socket.error, e:
-			self._logger.warning("[__send]%s" % e)
-			return self.shutdown()
+			if (str(e) == "timed out"):
+				self._logger.debug("[write]time out, ignored!")
+				if self._sniffer:
+					return self._sniffer.registSock(self._sock, self.read, None, None)
+				time.sleep(0.1)
+			else:
+				self._logger.warning("[__send]%s" % e)
+				return self.shutdown()
 
 	def shutdown(self):
 		self._logger.debug("[shutdown]" + str(self._addr) + "...")
