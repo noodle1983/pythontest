@@ -9,9 +9,9 @@ class Element(object):
 	mFirstTag = re.compile("^<.*?>")
 	mLastTag = re.compile("<.*?>$") 
 
-	def __init__(self):
-		self.name = None
-		self.value = None
+	def __init__(self, name = None, value = None, attrs = {}):
+		self.name = name
+		self.value = value
 		self.attrs = {}
 
 	def __str__(self):
@@ -24,14 +24,21 @@ class Element(object):
 			self.attrs[key] = value
 		return self
 
+	def toXml(self):
+		e = minidom.Element(self.name)	
+		for (key, value) in self.attrs.items():
+			e.setAttribute(key, value)
+		text = minidom.Text()
+		text.data = self.value
+		e.appendChild(text)
+		return e
+
 if __name__ == '__main__':
 	root = minidom.parseString("""<config type="int" ctrl="seq">
-	<name>total len</name>
-	<desc>total len</desc>
-	<valuedef/>
+	valuedef
 </config>""")
 
 	e = root.firstChild
 	i = Element()
 	i.fromXml(e)
-	print i
+	print i.toXml().toxml()
