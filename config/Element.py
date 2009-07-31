@@ -9,10 +9,13 @@ class Element(object):
 	mFirstTag = re.compile("^<.*?>")
 	mLastTag = re.compile("<.*?>$") 
 
-	def __init__(self, name = None, value = None, attrs = {}):
+	def __init__(self, name = None, value = None, attrs = None ):
 		self.name = name
 		self.value = value
-		self.attrs = {}
+		if attrs is None:
+			self.attrs =  {}
+		else:
+			self.attrs = attrs 
 
 	def __str__(self):
 		return "%s: %s" % (self.name, self.value)
@@ -28,9 +31,10 @@ class Element(object):
 		e = minidom.Element(self.name)	
 		for (key, value) in self.attrs.items():
 			e.setAttribute(key, value)
-		text = minidom.Text()
-		text.data = self.value
-		e.appendChild(text)
+		if self.value is not None:
+			text = minidom.Text()
+			text.data = self.value
+			e.appendChild(text)
 		return e
 
 if __name__ == '__main__':
@@ -41,4 +45,4 @@ if __name__ == '__main__':
 	e = root.firstChild
 	i = Element()
 	i.fromXml(e)
-	print i.toXml().toxml()
+	print i.toXml().toprettyxml()

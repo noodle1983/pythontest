@@ -21,14 +21,22 @@ class Enum(object):
 				self.descOf[e.attrs['id']] = e.attrs['desc']
 		return self
 
+	def toXml(self):
+		parent = Element('enum').toXml()	
+		for (id, desc) in self.descOf.items():
+			item = Element(name='enumitem', attrs = {'id': id, 'desc': desc}).toXml()
+			parent.appendChild(item)
+		return parent
+
 if __name__ == '__main__':
 	root = minidom.parseString("""
 <enum>
 	<enumitem id="0x01" desc="msg1"/>
+	<enumitem id="0x02" desc="msg2"/>
 </enum>
 	""")
 
 	e = root.firstChild
 	enum = Enum().fromXml(e)
-	print enum.idOf 
-	print enum.descOf
+	print enum.idOf
+	print enum.toXml().toprettyxml()
