@@ -49,7 +49,7 @@ class TcpServer:
 		while self._status == 'running':
 			try:
 				sock, addr = self._socket.accept()
-				con = Connection(logger=self._logger, sock=sock, addr=addr, sniffer=None)
+				con = Connection(logger=self._logger, sock=sock, addr=addr, sniffer=self._sniffer)
 				self._logger.debug("new connection from :" + str(addr))
 				self._connectionPool.append(addr, con)	
 			except  socket.timeout :

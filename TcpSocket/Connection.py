@@ -24,7 +24,7 @@ class Connection:
 		self._writeProcessor = Processor()
 
 		if self._sock:
-			self._sock.settimeout(1)
+			self._sock.settimeout(3)
 			self.__startToHandleMsg()	
 
 		#self._thread = threading.Thread(target=self.read)
@@ -44,7 +44,7 @@ class Connection:
 		self._addr = (host, port)
 		self._sock.connect(self._addr)
 		self._status = 'started'	
-		self._sock.settimeout(1)
+		self._sock.settimeout(3)
 		self.__startToHandleMsg()
 
 	def stop(self):
@@ -54,13 +54,18 @@ class Connection:
 	def read(self):
 		while self._status != 'stopped':
 			try:
-				if self._sock is not None:
-					buf = self._sock.recv(1024)
-					self._logger.debug("[read]bufLen:%d" % (len(buf)))
-					#self.write(buf)
+				buf = self._sock.recv(4096)
+				if len(buf) == 0:
+					raise socket.timeout
+					self._logger.debug("[read]buf:%s" % (buf))
+				self._logger.debug("[read]bufLen:%d" % (len(buf)))
+				#
+				#self.write(buf)
 			except socket.timeout:
+				self._logger.debug("[read]time out!")
 				if self._sniffer:
 					return self._sniffer.registSock(self._sock, self.read, None, None)
+				time.sleep(0.1)
 			except socket.error:
 				return self.shutdown()
 
@@ -84,6 +89,7 @@ class Connection:
 					return self._sniffer.registSock(self._sock, None, self.writeImpl, None)
 				time.sleep(0.1)	
 				continue
+		self._logger.debug("[writeImpl]quit send.")
 
 	def __send(self, buf):
 		try:
@@ -112,7 +118,7 @@ if __name__ == '__main__':
 
 	log = Logger.Logger()
 	con = Connection(logger=log)
-	con.connect('localhost', 4080)
+	con.connect('localhost', 8080)
 	data = array.array('c', '0' * 100)
 	
 	totalLen = NetworkObj.Uint32("TotalLen", 100)
@@ -147,12 +153,13 @@ if __name__ == '__main__':
 
 	import time
 	beginTime = time.time()
-	msgCount = 100000
+	msgCount = 10000
 	for i in range(msgCount):
 		con.write(data)
 
 	while len(con._writeQueue):
 		time.sleep(0.1)
+	con.shutdown()
 	print "tps:%f"% (msgCount/(time.time() - beginTime))
 	
 	raw_input("input any key to quit.")

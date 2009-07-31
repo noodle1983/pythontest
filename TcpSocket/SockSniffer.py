@@ -39,7 +39,7 @@ class SockSniffer:
 			outFds = self._outHandlers.keys()
 			errFds = self._errHandlers.keys()
 		try:
-			(inReadyFds, outReadyFds, errReadyFds) = select.select(inFds, outFds, errFds, 1)
+			(inReadyFds, outReadyFds, errReadyFds) = select.select(inFds, outFds, errFds, 0.1)
 		except select.error:
 			return self._selectProcessor.process(self.select)
 
@@ -80,7 +80,7 @@ if __name__ == '__main__' :
 	from TcpServer import TcpServer
 	import ConnectionPool as cp
 	tcpServer = TcpServer(logger = log, sniffer=sniffer)
-	tcpServer.startAt('4080')
+	tcpServer.startAt('8080')
 	
 			
 
