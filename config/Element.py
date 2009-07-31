@@ -6,8 +6,8 @@ import re
 
 class Element(object):
 	
-	mFirstTag = re.compile("^<.*?>")
-	mLastTag = re.compile("<.*?>$") 
+	mFirstTag = re.compile("^<.*?>\s*")
+	mLastTag = re.compile("\s*<.*?>$") 
 
 	def __init__(self, name = None, value = None, attrs = None ):
 		self.name = name

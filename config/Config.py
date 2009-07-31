@@ -1,6 +1,7 @@
 from xml.dom import minidom
 from xml.dom.minidom import Node
 from Element import Element
+from ValueDef import ValueDef
 import re
 
 	
@@ -34,20 +35,45 @@ class Config(object):
 			e = Element().fromXml(ch)				
 			if e.name == 'name':
 				self.name = e.value
-			else if e.name == 'desc':
+			elif e.name == 'desc':
 				self.desc = e.value
-			else if e.name == 'valuedef':
+			elif e.name == 'valuedef':
 				self.valuedef = ValueDef().fromXml(ch)
 		return self
 
+	def toXml(self):
+		parent = Element('config').toXml()
+		
+		ch = Element('name', self.name).toXml()		
+		parent.appendChild(ch)
+
+		ch = Element('desc', self.desc).toXml()
+		parent.appendChild(ch)
+
+		ch = self.valuedef.toXml()
+		parent.appendChild(ch)
+
+		return parent
+
 if __name__ == '__main__':
-	root = minidom.parseString("""<config type="int" ctrl="seq">
-	<name>total len</name>
-	<desc>total len</desc>
-	<valuedef/>
-</config>""")
+	root = minidom.parseString("""
+<config type="enum" ctrl="switcher" count="one">
+	<name>commandId</name>
+	<desc>command id</desc>
+	<valuedef>
+	<ref   >aaa</ref>
+	<default   >de</default>
+	<range min="0" max="1"></range>
+	<len fix="1" min="2" max="3"/>
+	<enum>
+		<enumitem id="0x01" desc="msg1"/>
+		<enumitem id="0x02" desc="msg2"/>
+	</enum>
+	</valuedef>
+</config>
+""")
 
 	element = root.firstChild
-	i = Int()
-	i.fromXml(element)
-	print i
+	i = Config().fromXml(element)
+	print i.toXml().toxml()
+	print i.toXml().toprettyxml()
