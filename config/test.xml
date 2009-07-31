@@ -13,7 +13,8 @@
 	<desc>command id</desc>
 	<valuedef>
 	<enum>
-		<enumitem id="0x01" desc="msg1"></enumitem>
+		<enumitem id="0x01" desc="msg1"/>
+		<enumitem id="0x02" desc="msg2"></enumitem>
 	</enum>
 	</valuedef>
 </config>
@@ -42,6 +43,7 @@
 </config>
 
 </configure>
+
 
 
 
