@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!ELEMENT configure (config*)>
-<!ATTLIST configure
+<!ELEMENT configuration (config*)>
+<!ATTLIST configuration
 	namespace CDATA #REQUIRED
 >
 <!ELEMENT config (name, desc, valuedef, config*)>
@@ -31,5 +31,6 @@
           min CDATA #IMPLIED
           max CDATA #IMPLIED
 >
+
 
 

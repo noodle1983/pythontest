@@ -18,7 +18,7 @@ class Element(object):
 			self.attrs = attrs 
 
 	def __str__(self):
-		return "%s: %s" % (self.name, self.value)
+		return self.toXml().toxml()
 
 	def fromXml(self, e):
 		self.name = e.tagName
@@ -43,6 +43,7 @@ if __name__ == '__main__':
 </config>""")
 
 	e = root.firstChild
-	i = Element()
-	i.fromXml(e)
+	i = Element().fromXml(e)
+	print i
 	print i.toXml().toprettyxml()
+	raw_input('put any key to quit.')

@@ -15,6 +15,9 @@ class ValueDef(object):
 		self.range = None
 		self.len = None
 
+	def __str__(self):
+		return self.toXml().toxml()
+
 	def fromXml(self, v):
 		for ch in v.childNodes:
 			if ch.nodeType != Node.ELEMENT_NODE: 
@@ -65,4 +68,6 @@ if __name__ == '__main__':
 
 	e = root.firstChild
 	v = ValueDef().fromXml(e)
+	print v
 	print v.toXml().toprettyxml()
+	raw_input('put any key to quit.')

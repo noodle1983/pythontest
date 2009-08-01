@@ -11,6 +11,9 @@ class Enum(object):
 		self.idOf = {}
 		self.descOf = {}
 
+	def __str__(self):
+		return self.toXml().toxml()
+
 	def fromXml(self, v):
 		for ch in v.childNodes:
 			if ch.nodeType != Node.ELEMENT_NODE: 
@@ -38,5 +41,6 @@ if __name__ == '__main__':
 
 	e = root.firstChild
 	enum = Enum().fromXml(e)
-	print enum.idOf
+	print enum
 	print enum.toXml().toprettyxml()
+	raw_input('put any key to quit')
