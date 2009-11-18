@@ -26,11 +26,44 @@ class AsynClientSocket:
 				raise
 		self.status = STATUS_C
 
-	def	close(self):
+	def close(self):
 		self.sock.close()
 		self.sock.status = STATUS_N
+		
+	def getFileNo(self):
+		return self.sock.fileno()
 
 if __name__ == '__main__':
+	import select
+	print "-----------------test2-----------------"
 	sock = AsynClientSocket()
-	sock.connect('147.128.104.32', 8080)
-	raw_input("input any key to quit.")
+	try:
+		sock.connect('www.baidu.com', 80)
+	except socket.error, e:
+		print e
+		raw_input("test failed.")
+	
+
+	sockfds = []
+	sockfds.append(sock.getFileNo())
+	(infds, outfds, errfds) = select.select(sockfds, sockfds, sockfds, 1)
+	print "infds:", infds
+	print "outfds:", outfds
+	print "errfds:", errfds
+	
+	print "-----------------test2-----------------"
+	sock = AsynClientSocket()
+	try:
+		sock.connect('192.168.168.168', 80)
+	except socket.error, e:
+		print e
+		raw_input("test failed.")
+	
+	import select
+	sockfds = []
+	sockfds.append(sock.getFileNo())
+	(infds, outfds, errfds) = select.select(sockfds, sockfds, sockfds)
+	print "infds:", infds
+	print "outfds:", outfds
+	print "errfds:", errfds
+	raw_input("test ok.")
