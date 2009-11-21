@@ -38,10 +38,13 @@ class AsynConnector:
 			else:
 				print "raise error:", e
 				raise
-		return true
+		return True
 	
 	def elapse(self, second = 1):
 		self.countdowner.decrease(second)
+
+	def isConnected(self, sockStatus):
+		return (sockStatus & STATUS_C)
 
 	def hasError(self, sockStatus):
 		"""
@@ -52,7 +55,7 @@ class AsynConnector:
 		if self.countdowner.done():
 			print "connector timeout." 
 			return True
-		if (sockStatus & STATUS_E) or (sockStatus == 6):
+		if (sockStatus & STATUS_E): 
 			print "connector error."
 			return True
 
