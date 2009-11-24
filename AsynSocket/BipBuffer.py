@@ -52,7 +52,7 @@ class BipBuffer:
 
 		#not enough space
 		else:
-			raise socket.error(errno.ENOBUFS)	
+			raise socket.error(errno.ENOBUFS, "Buffer has not enough space to write", "BipBuffer._writeBufferB")	
 
 	def _makeBufferB(self):
 		self.wIndex = 0
@@ -69,8 +69,8 @@ class BipBuffer:
 		return res
 
 	def read_reserve(self, n):
-		if self.reIndex - self.rIndex < 0:
-			raise socket.error(errno.ENODATA)
+		if self.reIndex - self.rIndex <= 0:
+			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.read_reserve")
 		else:
 			return struct.unpack_from("%ds"%n, self.buff, self.rIndex)[0]	
 
@@ -85,7 +85,7 @@ class BipBuffer:
 		if n > 0:
 			return struct.unpack_from("%ds"%n, self.buff, self.rIndex)[0]	
 		else:
-			raise socket.error(errno.ENODATA)
+			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.read")
 
 	def dump(self):
 		print "----------------buffer---------------\n"\
@@ -131,11 +131,56 @@ if __name__ == '__main__':
 			buffer.dump()
 			raise
 
+
+	def test_performance():
+		import time
+		buffer = BipBuffer(32)
+		bufferN = 10000
+		def writeBuffer():
+			i = 0
+			while i < bufferN:
+				try:
+					buffer.write('1234567890', 10)
+				except socket.error, e:
+					if e.errno == errno.ENOBUFS:
+						print "not enough buffer %d\n"% i
+						time.sleep(1)				
+						continue
+					else:
+						print 'test failed, unknow error\n', e
+						raise
+				i = i + 1
+
+
+		
+		th = threading.Thread(target=writeBuffer)
+		th.start()
+		i = 0
+		while i < bufferN:
+			try:
+				if '1234567890' != buffer.readn(10):
+					print "test_wrap failed! data are not consistent!"
+					buffer.dump()
+					raise
+			except socket.error, e:
+				if e.errno == errno.ENOBUFS:
+					print "no data to read %d\n"% i
+					time.sleep(1)				
+					continue
+				else:
+					print 'test failed, unknow error\n', e
+					raise
+			i = i + 1
+
+			
+		th.join()
 	try:
 		test_normal()
 		test_wrap()
+		test_performance()
 		print "test ok"
 	except Exception, e:
 		print "test failed:"
 		print e
+	raw_input("")
 
