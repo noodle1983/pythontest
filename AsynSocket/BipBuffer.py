@@ -69,6 +69,8 @@ class BipBuffer:
 		return res
 
 	def read_reserve(self, n):
+		if self.usingBufferB and self.rIndex == self.reIndex:
+			self._cancelBufferB()
 		if self.reIndex - self.rIndex <= 0:
 			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.read_reserve")
 		else:
@@ -144,7 +146,7 @@ if __name__ == '__main__':
 				except socket.error, e:
 					if e.errno == errno.ENOBUFS:
 						print "not enough buffer %d\n"% i
-						time.sleep(1)				
+						#time.sleep(1)				
 						continue
 					else:
 						print 'test failed, unknow error\n', e
@@ -165,7 +167,7 @@ if __name__ == '__main__':
 			except socket.error, e:
 				if e.errno == errno.ENOBUFS:
 					print "no data to read %d\n"% i
-					time.sleep(1)				
+					#time.sleep(1)				
 					continue
 				else:
 					print 'test failed, unknow error\n', e
