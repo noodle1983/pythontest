@@ -1,5 +1,6 @@
 import socket
 import errno
+from BipBuffer import BipBuffer
 
 STATUS_N = 0 #None
 STATUS_C = 1 #Connected
@@ -87,6 +88,8 @@ class AsynClientSocket:
 		self.sock.setblocking(0)
 		self.status = ConStatus()
 		self.connector = AsynConnector(self.sock)
+		self.recvBuffer = BipBuffer(1024*1024)
+		self.sendBuffer = BipBuffer(1024*1024)
 
 	def connect(self, host,	port, timeout = 3):
 		self.addr = (host, port)
@@ -112,6 +115,9 @@ class AsynClientSocket:
 		
 	def getFileNo(self):
 		return self.sock.fileno()
+
+	def send(self, package, len):
+		self.sendBuffer.write(package, len)
 
 if __name__ == '__main__':
 	import select
