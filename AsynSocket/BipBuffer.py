@@ -137,12 +137,14 @@ if __name__ == '__main__':
 	def test_performance():
 		import time
 		buffer = BipBuffer(32)
-		bufferN = 10000
+		bufferN = 1000
+		countPerAction = 23
 		def writeBuffer():
 			i = 0
 			while i < bufferN:
+				ch = str(i%10)
 				try:
-					buffer.write('1234567890', 10)
+					buffer.write(ch * countPerAction, countPerAction)
 				except socket.error, e:
 					if e.errno == errno.ENOBUFS:
 						print "not enough buffer %d\n"% i
@@ -159,8 +161,9 @@ if __name__ == '__main__':
 		th.start()
 		i = 0
 		while i < bufferN:
+			ch = str(i%10)
 			try:
-				if '1234567890' != buffer.readn(10):
+				if (ch*countPerAction) != buffer.readn(countPerAction):
 					print "test_wrap failed! data are not consistent!"
 					buffer.dump()
 					raise
@@ -173,9 +176,13 @@ if __name__ == '__main__':
 					print 'test failed, unknow error\n', e
 					raise
 			i = i + 1
-
 			
 		th.join()
+		buffer.dump()
+
+		bufferUsed = 32/countPerAction*countPerAction
+		if buffer.rIndex%bufferUsed != (bufferN*countPerAction)%bufferUsed:
+			raise "wrong read index!\n"
 	try:
 		test_normal()
 		test_wrap()
