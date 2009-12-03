@@ -108,14 +108,17 @@ class BipBuffer:
 
 if __name__ == '__main__':
 	def test_normal():
+		print '-'*20, 'test_normal', '-'*20
 		buffer = BipBuffer(32)
 		buffer.write('1', 1)
 		if '1' != buffer.readn(1):
 			print "test_normal failed"
 			buffer.dump()
 			raise
+		print "test ok"
 
 	def test_wrap():
+		print '-'*20, 'test_wrap', '-'*20
 		buffer = BipBuffer(32)
 		buffer.write('1234567890', 10)
 		buffer.write('1234567890', 10)
@@ -139,9 +142,11 @@ if __name__ == '__main__':
 			print "test_wrap failed! buffer should using BufferB"
 			buffer.dump()
 			raise
+		print "test ok"
 
 
-	def test_performance():
+	def test_correct():
+		print '-'*20, 'test_correct', '-'*20
 		import time
 		buffer = BipBuffer(32)
 		bufferN = 1024
@@ -186,11 +191,13 @@ if __name__ == '__main__':
 			
 		th.join()
 		buffer.dump()
+		print "test ok"
 
 	def test_count():
+		print '-'*20, 'test_count', '-'*20
 		import time
 		buffer = BipBuffer(32)
-		bufferN = 10
+		bufferN = 1024
 		countPerAction = 5 
 		def writeBuffer2():
 			i = 0
@@ -202,7 +209,7 @@ if __name__ == '__main__':
 					writeCount = writeCount + countPerAction
 				except socket.error, e:
 					if e.errno == errno.ENOBUFS:
-						print "not enough buffer %d\n"% writeCount
+						#print "not enough buffer %d\n"% writeCount
 						#time.sleep(1)				
 						continue
 					else:
@@ -221,10 +228,10 @@ if __name__ == '__main__':
 				(data, n) = buffer.read()
 				readCount = readCount + n 
 				readTime = readTime + 1
-				print "read len:%d, read:%s" % (n, data)
+				#print "read len:%d, read:%s" % (n, data)
 			except socket.error, e :
 				if e.errno == errno.ENOBUFS:
-					print "no data to read. readed:%d\n"% readCount
+					#print "no data to read. readed:%d\n"% readCount
 					#buffer.dump()
 					#time.sleep(1)				
 					continue
@@ -237,13 +244,14 @@ if __name__ == '__main__':
 			print "test_count error, remain buffer len:%d" % buffer.dataLen()
 			buffer.dump()
 			raise
+		print "test ok"
 
 	try:
 		test_normal()
 		test_wrap()
-		#test_performance()
+		#test_correct()
 		test_count()
-		print "test ok"
+		print '-'*20, 'all_done', '-'*20
 	except Exception, e:
 		print "test failed:"
 		print e
