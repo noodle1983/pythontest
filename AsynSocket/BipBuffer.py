@@ -71,10 +71,10 @@ class BipBuffer:
 	def readn_reserve(self, n):
 		if self.usingBufferB and self.rIndex == self.reIndex:
 			self._cancelBufferB()
-		if self.reIndex - self.rIndex <= 0:
-			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.readn_reserve")
+		if self.reIndex - self.rIndex > 0:
+			return struct.unpack_from("%ds"%n, self.buff, self.rIndex)[0]
 		else:
-			return struct.unpack_from("%ds"%n, self.buff, self.rIndex)[0]	
+			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.readn_reserve")
 
 	def read_confirm(self, n):
 		self.rIndex = self.rIndex + n
@@ -87,9 +87,11 @@ class BipBuffer:
 		return  (res, n)
 		
 	def read_reserve(self):
+		if self.usingBufferB and self.rIndex == self.reIndex:
+			self._cancelBufferB()
 		n = self.reIndex - self.rIndex  
 		if n > 0:
-			return (self.readn_reserve(n), n)	
+			return (struct.unpack_from("%ds"%n, self.buff, self.rIndex)[0], n)	
 		else:
 			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.read")
 		
@@ -197,7 +199,7 @@ if __name__ == '__main__':
 		print '-'*20, 'test_count', '-'*20
 		import time
 		buffer = BipBuffer(32)
-		bufferN = 1024
+		bufferN = 1024 * 1024
 		countPerAction = 5 
 		def writeBuffer2():
 			i = 0
@@ -210,13 +212,14 @@ if __name__ == '__main__':
 				except socket.error, e:
 					if e.errno == errno.ENOBUFS:
 						#print "not enough buffer %d\n"% writeCount
+						#buffer.dump()
 						#time.sleep(1)				
 						continue
 					else:
 						print 'test failed, unknow error\n', e
 						raise
 				i = i + 1
-			print "write done: write count:%d" % writeCount
+			print "write done. write times:%d, write count:%d" % (bufferN, writeCount)
 
 		
 		th = threading.Thread(target=writeBuffer2)
@@ -233,13 +236,13 @@ if __name__ == '__main__':
 				if e.errno == errno.ENOBUFS:
 					#print "no data to read. readed:%d\n"% readCount
 					#buffer.dump()
-					#time.sleep(1)				
+					#time.sleep(1)
 					continue
 				else:
 					print 'test failed, unknow error\n', e
 					raise
 		th.join()
-		print "read done. read times:%d, readCount:%d" % (readTime, readCount)
+		print "read done. read times:%d, readCount:%d, average readed:%d" % (readTime, readCount, readCount/readTime)
 		if buffer.dataLen() > 0:
 			print "test_count error, remain buffer len:%d" % buffer.dataLen()
 			buffer.dump()
