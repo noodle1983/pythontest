@@ -199,7 +199,7 @@ if __name__ == '__main__':
 		print '-'*20, 'test_count', '-'*20
 		import time
 		buffer = BipBuffer(32)
-		bufferN = 1024 * 1024
+		bufferN = 1024 
 		countPerAction = 5 
 		def writeBuffer2():
 			i = 0
@@ -252,7 +252,7 @@ if __name__ == '__main__':
 	try:
 		test_normal()
 		test_wrap()
-		#test_correct()
+		test_correct()
 		test_count()
 		print '-'*20, 'all_done', '-'*20
 	except Exception, e:

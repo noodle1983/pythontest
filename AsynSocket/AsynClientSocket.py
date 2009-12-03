@@ -5,7 +5,7 @@ from BipBuffer import BipBuffer
 STATUS_N = 0 #None
 STATUS_C = 1 #Connected
 STATUS_R = 2 #Reading
-STATUS_W = 4 #Writing
+STATUS_W = 4 #Write queue not empty
 STATUS_E = 8 #Error
 
 class CountDowner:
@@ -107,7 +107,7 @@ class AsynClientSocket:
 	def close(self):
 		self.sock.close()
 		self.sock.status.set()
-
+		
 	def reportError(self, strerror):
 		print "error occur:", strerror
 		self.sock.status.set(STATUS_E)
@@ -118,6 +118,13 @@ class AsynClientSocket:
 
 	def send(self, package, len):
 		self.sendBuffer.write(package, len)
+		self.sock.status.addStatus(STATUS_W)
+
+	def read(self):
+		"""
+			return (package, len)
+		"""
+
 
 if __name__ == '__main__':
 	import select
