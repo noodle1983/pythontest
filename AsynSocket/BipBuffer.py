@@ -64,15 +64,15 @@ class BipBuffer:
 		self.usingBufferB = False
 
 	def readn(self, n):
-		res = self.read_reserve(n)
+		res = self.readn_reserve(n)
 		self.read_confirm(n)
 		return res
 
-	def read_reserve(self, n):
+	def readn_reserve(self, n):
 		if self.usingBufferB and self.rIndex == self.reIndex:
 			self._cancelBufferB()
 		if self.reIndex - self.rIndex <= 0:
-			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.read_reserve")
+			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.readn_reserve")
 		else:
 			return struct.unpack_from("%ds"%n, self.buff, self.rIndex)[0]	
 
@@ -81,13 +81,20 @@ class BipBuffer:
 		if self.usingBufferB and self.rIndex == self.reIndex:
 			self._cancelBufferB()
 
-	
 	def read(self):
+		(res, n) = self.read_reserve()
+		self.read_confirm(n)
+		return  (res, n)
+		
+	def read_reserve(self):
 		n = self.reIndex - self.rIndex  
 		if n > 0:
-			return struct.unpack_from("%ds"%n, self.buff, self.rIndex)[0]	
+			return (self.readn_reserve(n), n)	
 		else:
 			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.read")
+		
+	def dataLen(self):
+		return self.reIndex - self.rIndex  
 
 	def dump(self):
 		print "----------------buffer---------------\n"\
@@ -103,7 +110,7 @@ if __name__ == '__main__':
 	def test_normal():
 		buffer = BipBuffer(32)
 		buffer.write('1', 1)
-		if '1' != buffer.read():
+		if '1' != buffer.readn(1):
 			print "test_normal failed"
 			buffer.dump()
 			raise
@@ -137,8 +144,8 @@ if __name__ == '__main__':
 	def test_performance():
 		import time
 		buffer = BipBuffer(32)
-		bufferN = 10000
-		countPerAction = 7
+		bufferN = 1024
+		countPerAction = 5 
 		def writeBuffer():
 			i = 0
 			while i < bufferN:
@@ -147,7 +154,7 @@ if __name__ == '__main__':
 					buffer.write(ch * (i%countPerAction + 1), (i%countPerAction + 1))
 				except socket.error, e:
 					if e.errno == errno.ENOBUFS:
-						print "not enough buffer %d\n"% i
+						#print "not enough buffer %d\n"% i
 						#time.sleep(1)				
 						continue
 					else:
@@ -169,7 +176,7 @@ if __name__ == '__main__':
 					raise
 			except socket.error, e:
 				if e.errno == errno.ENOBUFS:
-					print "no data to read %d\n"% i
+					#print "no data to read %d\n"% i
 					#time.sleep(1)				
 					continue
 				else:
@@ -180,10 +187,62 @@ if __name__ == '__main__':
 		th.join()
 		buffer.dump()
 
+	def test_count():
+		import time
+		buffer = BipBuffer(32)
+		bufferN = 10
+		countPerAction = 5 
+		def writeBuffer2():
+			i = 0
+			writeCount = 0
+			while i < bufferN:
+				ch = str(i%10)
+				try:
+					buffer.write(ch * countPerAction, countPerAction)
+					writeCount = writeCount + countPerAction
+				except socket.error, e:
+					if e.errno == errno.ENOBUFS:
+						print "not enough buffer %d\n"% writeCount
+						#time.sleep(1)				
+						continue
+					else:
+						print 'test failed, unknow error\n', e
+						raise
+				i = i + 1
+			print "write done: write count:%d" % writeCount
+
+		
+		th = threading.Thread(target=writeBuffer2)
+		th.start()
+		readCount = 0 
+		readTime = 0
+		while readCount < bufferN*countPerAction:
+			try:
+				(data, n) = buffer.read()
+				readCount = readCount + n 
+				readTime = readTime + 1
+				print "read len:%d, read:%s" % (n, data)
+			except socket.error, e :
+				if e.errno == errno.ENOBUFS:
+					print "no data to read. readed:%d\n"% readCount
+					#buffer.dump()
+					#time.sleep(1)				
+					continue
+				else:
+					print 'test failed, unknow error\n', e
+					raise
+		th.join()
+		print "read done. read times:%d, readCount:%d" % (readTime, readCount)
+		if buffer.dataLen() > 0:
+			print "test_count error, remain buffer len:%d" % buffer.dataLen()
+			buffer.dump()
+			raise
+
 	try:
 		test_normal()
 		test_wrap()
-		test_performance()
+		#test_performance()
+		test_count()
 		print "test ok"
 	except Exception, e:
 		print "test failed:"
