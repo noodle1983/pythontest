@@ -2,12 +2,31 @@ import socket
 import errno
 from BipBuffer import BipBuffer
 
-STATUS_N = 0 #None
-STATUS_C = 1 #Connected
-STATUS_R = 2 #Reading
-STATUS_W = 4 #Write queue not empty
-STATUS_E = 8 #Error
-
+STATUS_N =  0    #None
+STATUS_C =  0x01 #Connected
+#STATUS_R =  0x02 #Reading
+#STATUS_W =  0x04 #Writing
+STATUS_E =  0x08 #Error
+STATUS_RF = 0x10 #Read Flag, socket has data to read
+STATUS_WF = 0x20 #Write Flag, socket can be writen to
+STATUS_D =  0x40 #has data to send
+"""
+send workflow: 
+	related status: STATUS_D, STATUS_WF. initialized 0;
+	logic thread: put data to sending buffer, set status STATUS_D = 1
+	select therad: 
+		select write if STATUS_D = 1 and STATUS_WF = 0
+		set STATUS_WF = 1 if socket is ready to send
+		new send job if STATUS_WF = 1 and STATUS_D = 1
+	send job: send all and set STATUS_D = 0 and STATUS_WF = 0
+receive workflow:
+	related status: STATUS_RF. initialized 0;
+	select thread:
+		select read if STATUS_RF = 0 
+		set STATUS_RF = 1 if socket has data to read
+		new read job if STATUS_RF = 1
+	read job: read all and set STATUS_RF = 0
+"""
 class CountDowner:
 
 	def __init__(self, begin = 0):
