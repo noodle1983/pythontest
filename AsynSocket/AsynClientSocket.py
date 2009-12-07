@@ -19,6 +19,7 @@ send workflow:
 		set STATUS_WF = 1 if socket is ready to send
 		new send job if STATUS_WF = 1 and STATUS_D = 1
 	send job: send all and set STATUS_D = 0 and STATUS_WF = 0
+
 receive workflow:
 	related status: STATUS_RF. initialized 0;
 	select thread:
@@ -26,6 +27,20 @@ receive workflow:
 		set STATUS_RF = 1 if socket has data to read
 		new read job if STATUS_RF = 1
 	read job: read all and set STATUS_RF = 0
+
+event notification:
+        select write:
+            send workflow: if STATUS_D = 1 and STATUS_WF = 0
+            connect workflow: STATUS_C = 1
+            receive workflow: ignore
+            error workflow: STATUS_E = 0
+        select read:
+            send workflow: ignore
+            connect workflow: ignore
+            receive workflow: if STATUS_RF = 0 
+            error workflow: STATUS_E = 0
+
+Sockets manager
 """
 class CountDowner:
 
