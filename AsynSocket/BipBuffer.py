@@ -93,7 +93,7 @@ class BipBuffer:
 		if n > 0:
 			return (struct.unpack_from("%ds"%n, self.buff, self.rIndex)[0], n)	
 		else:
-			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.read")
+			return ('', 0)	
 		
 	def dataLen(self):
 		return self.reIndex - self.rIndex  
