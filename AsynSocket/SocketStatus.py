@@ -76,6 +76,9 @@ class SocketStatus:
 	def get(self):
 		return self.status
 	
+	def has(self, theStatus):
+		return self.status & theStatus
+
 	def dump(self):
 		strStatus = ["STATUS:"] 
 		for i in range(0, len(CONST.STATUS_DESC)):

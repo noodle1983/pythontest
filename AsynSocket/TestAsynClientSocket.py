@@ -13,11 +13,12 @@ def testSendData():
 	except socket.error, e:
 		print e
 		raw_input("test failed.")
+		raise(e)
 
 	print sock.dump()
 
 	sockfds = []
-	sockfds.append(sock.getFileNo())
+	sockfds.append(sock.sock)
 	
 	wsockFds = sockfds
 	sock.send("abcd", 4)
