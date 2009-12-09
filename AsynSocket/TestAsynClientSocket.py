@@ -1,6 +1,9 @@
 import select
 from AsynClientSocket import *
 
+import SocketStatus
+import CONST
+
 def testSendData():
 	print '=' * 60
 	print '-' * 20, 'testSendData', '-'* 20
@@ -11,7 +14,7 @@ def testSendData():
 		print e
 		raw_input("test failed.")
 
-	print sock.dumpStatus()
+	print sock.dump()
 
 	sockfds = []
 	sockfds.append(sock.getFileNo())
@@ -24,24 +27,24 @@ def testSendData():
 		print "outfds:", outfds
 		print "errfds:", errfds
 		if infds:
-			sock.status.addStatus(STATUS_RF)
+			sock.status.addStatus(CONST.STATUS_RF)
 		if outfds:
-			sock.status.addStatus(STATUS_WF)
+			sock.status.addStatus(CONST.STATUS_WF)
 		if errfds:
-			sock.status.addStatus(STATUS_E)
-		print "after select:", sock.dumpStatus()
+			sock.status.addStatus(CONST.STATUS_E)
+		print "after select:", sock.dump()
 
 		sock.checkConnection()	
-		print "after checkConnection:", sock.dumpStatus()
+		print "after checkConnection:", sock.dump()
 		
-		if sock.status.get() & STATUS_WF:
+		if sock.status.get() & CONST.STATUS_WF:
 			sock.sendImpl()
 			wsockFds = []
-			print "after send:", sock.dumpStatus()
-		if sock.status.get() & STATUS_RF:
+			print "after send:", sock.dump()
+		if sock.status.get() & CONST.STATUS_RF:
 			sock.recvImpl()
 			print "recv:", sock.recv()
-			print "after recv:", sock.dumpStatus()
+			print "after recv:", sock.dump()
 			break
 
 	print '-' * 20, 'test done', '-' * 20

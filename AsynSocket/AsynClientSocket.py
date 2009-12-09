@@ -2,60 +2,9 @@ import socket
 import errno
 from BipBuffer import BipBuffer
 
-STATUS_N =  0    #None
-STATUS_C =  0x01 #Connected
-#STATUS_R =  0x02 #Reading, 
-#STATUS_W =  0x04 #Writing
-STATUS_E =  0x08 #Error
-STATUS_RF = 0x10 #Read Flag, socket has data to read
-STATUS_WF = 0x20 #Write Flag, socket can be writen to
-STATUS_D =  0x40 #has data to send
-STATUS_UD = 0x80 #user delete
+import SocketStatus
+import CONST
 
-STATUS_DESC = ['connected', 'reading', 'writing', 'error', \
-		'SocketHasDataToRead', 'SocketCanWrite', 'HasDataToSend', 'UserStop']
-
-STATUS_CONNECTED_MASK = STATUS_WF | STATUS_RF | STATUS_E | STATUS_UD
-STATUS_CONNECTED_CON = STATUS_WF
-STATUS_SEL_WRITE_MASK = STATUS_D | STATUS_WF | STATUS_UD | STATUS_E
-STATUS_SEL_WRITE_CON  = STATUS_D | STATUS_C
-"""
-send workflow: 
-	related status: STATUS_D, STATUS_WF. initialized 0;
-	logic thread: put data to sending buffer, set status STATUS_D = 1
-	select therad: 
-		select write if STATUS_D = 1 and STATUS_WF = 0
-		set STATUS_WF = 1 if socket is ready to send
-		new send job if STATUS_WF = 1 and STATUS_D = 1
-	send job: send all and set STATUS_D = 0 and STATUS_WF = 0
-"""
-STATUS_SEL_READ_MASK = STATUS_RF | STATUS_UD
-STATUS_Sel_READ_CON = STATUS_N
-"""
-receive workflow:
-	related status: STATUS_RF. initialized 0;
-	select thread:
-		select read if STATUS_RF = 0 
-		set STATUS_RF = 1 if socket has data to read
-		new read job if STATUS_RF = 1
-	read job: read all and set STATUS_RF = 0
-"""
-
-"""
-event notification:
-        select write:
-            send workflow: if STATUS_D = 1 and STATUS_WF = 0
-            connect workflow: STATUS_C = 1
-            receive workflow: ignore
-            error workflow: STATUS_E = 0
-        select read:
-            send workflow: ignore
-            connect workflow: ignore
-            receive workflow: if STATUS_RF = 0 
-            error workflow: STATUS_E = 0
-
-
-"""
 class CountDowner:
 
 	def __init__(self, begin = 0):
@@ -93,8 +42,8 @@ class AsynConnector:
 		self.countdowner.decrease(second)
 
 	def isConnected(self, sockStatus):
-		return (sockStatus & STATUS_C)\
-				or ((sockStatus & STATUS_CONNECTED_MASK) == STATUS_CONNECTED_CON)
+		return (sockStatus & CONST.STATUS_C)\
+				or ((sockStatus & CONST.STATUS_CONNECTED_MASK) == CONST.STATUS_CONNECTED_CON)
 
 	def hasError(self, sockStatus):
 		"""
@@ -105,37 +54,16 @@ class AsynConnector:
 		if self.countdowner.done():
 			print "connector timeout." 
 			return True
-		if (sockStatus & STATUS_E): 
+		if (sockStatus & CONST.STATUS_E): 
 			print "connector error."
 			return True
 
-import threading
-class ConStatus:
-	def __init__(self, theStatus = STATUS_N):
-		self.lock = threading.RLock()
-		self.status = theStatus
-
-	def addStatus(self, theStatus):
-		with self.lock:
-			self.status = self.status | theStatus
-
-	def rmStatus(self, theStatus):
-		with self.lock:
-			self.status = self.status & ~theStatus
-
-	def set(self, theStatus = STATUS_N):
-		with self.lock:
-			self.status = theStatus
-
-	def get(self):
-		return self.status
-	
 class AsynClientSocket:
 
 	def __init__(self):
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setblocking(0)
-		self.status = ConStatus()
+		self.status = SocketStatus.SocketStatus()
 
 		self.keepAlive = True
 		self.connector = AsynConnector(self.sock)
@@ -154,14 +82,14 @@ class AsynClientSocket:
 			self.reportError("connecting error:\n" + str(e))
 			return
 		if retCon:
-			self.status.addStatus(STATUS_C)
+			self.status.addStatus(CONST.STATUS_C)
 
 	def checkConnection(self):
 		if not self.connector.isConnected(self.status.get()):
 			if self.connector.hasError(self.status.get()):
 				self.reportError("connecting error!\n")
-		elif not (self.status.get()& STATUS_C):
-			self.status.addStatus(STATUS_C)
+		elif not (self.status.get()& CONST.STATUS_C):
+			self.status.addStatus(CONST.STATUS_C)
 
 	def close(self):
 		self.sock.close()
@@ -169,7 +97,7 @@ class AsynClientSocket:
 		
 	def reportError(self, strerror):
 		print "error occur:", strerror
-		self.status.addStatus(STATUS_E)
+		self.status.addStatus(CONST.STATUS_E)
 		self.sock.close()
 #		if self.keepAlive:
 #			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -181,7 +109,7 @@ class AsynClientSocket:
 
 	def send(self, package, len):
 		self.sendBuffer.write(package, len)
-		self.status.addStatus(STATUS_D)
+		self.status.addStatus(CONST.STATUS_D)
 
 	def sendImpl(self):
 		try:
@@ -195,7 +123,7 @@ class AsynClientSocket:
 			self.reportError("sending error!\n" + str(e))
 			return
 		finally:
-			self.status.rmStatus(STATUS_WF|STATUS_D)	
+			self.status.rmStatus(CONST.STATUS_WF|CONST.STATUS_D)	
 			
 	def recv(self):
 		return self.recvBuffer.read()
@@ -209,7 +137,7 @@ class AsynClientSocket:
 				self.recvBackupPackage = 0
 			else:
 				buf = self.sock.recv(4096)
-				self.status.rmStatus(STATUS_RF)	
+				self.status.rmStatus(CONST.STATUS_RF)	
 			recvLen = len(buf)
 			if recvLen <= 0:
 				self.reportError("recv None buffer")
@@ -218,17 +146,13 @@ class AsynClientSocket:
 		except socket.error, e:
 			if e.errno == errno.ENOBUFS:
 				self.recvBackupPackage = buf 
-				self.status.addStatus(STATUS_RF)	
+				self.status.addStatus(CONST.STATUS_RF)	
 			self.reportError("receiving error!\n" + str(e))
 			return
 
 
-	def dumpStatus(self):
-		status = ["STATUS:"] 
-		for i in range(0, len(STATUS_DESC)):
-			if self.status.get() & (1 << i):
-				status.append(STATUS_DESC[i]) 
-		return status
+	def dump(self):
+		return self.status.dump()
 
 if __name__ == '__main__':
 	import select
