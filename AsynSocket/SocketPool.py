@@ -47,3 +47,19 @@ class SocketPool:
 				if not v.status.has(CONST.STATUS_UD | CONST.STATUS_E)]:
 					eCandidate.append(fd)
 		return (rCandidate, wCandidate, eCandidate)
+
+	def genJobs(self):
+		rJobs = []
+		wJobs = []
+		with self.lock:
+			for (fd, sock) in self.socketByFd.items():
+				if sock.status.has(CONST.STATUS_UD | CONST.STATUS_E): 
+					continue
+				if sock.status.has(CONST.STATUS_RF):
+					rJobs.append(sock.recvImpl)
+				if sock.status.has(CONST.STATUS_WF) and sock.status.has(CONST.STATUS_D):
+					wJobs.append(sock.sendImpl)
+		return (rJobs, wJobs)
+				
+
+					
