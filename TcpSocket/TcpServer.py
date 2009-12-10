@@ -75,7 +75,7 @@ class TcpServer:
 
 if __name__ == "__main__":
 	tcpServer = TcpServer(Logger.Logger())
-	tcpServer.startAt('4080')
+	tcpServer.startAt('8008')
 	import time 
 	while True:
 		time.sleep(20)
