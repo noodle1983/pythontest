@@ -96,6 +96,8 @@ class AsynClientSocket:
 		self.sock.status.set()
 		
 	def reportError(self, strerror):
+		"AsynClientSocket::reportError"
+
 		print "error occur:", strerror
 		self.status.addStatus(CONST.STATUS_E)
 		self.sock.close()
@@ -112,6 +114,7 @@ class AsynClientSocket:
 		self.status.addStatus(CONST.STATUS_D)
 
 	def sendImpl(self):
+		"AsynClientSocket::sendImpl"
 		try:
 			while True:
 				(package, len) = self.sendBuffer.read_reserve()	
@@ -129,6 +132,8 @@ class AsynClientSocket:
 		return self.recvBuffer.read()
 
 	def recvImpl(self):
+		"AsynClientSocket::recvImpl"
+
 		buf = ""
 		recvLen = 0
 		try:

@@ -28,8 +28,26 @@ def testAddSocket():
 	print '-' * 20, 'test done', '-' * 20
 	print '=' * 60
 
+def testConnectedJob():
+	print '=' * 60
+	print '-' * 20, 'testConnectedJob', '-'* 20
+	processor = Processor()
+	manager = SocketManager(processor)
+
+	newSock = AsynClientSocket()
+	manager.addSocket(newSock.getFileNo(), newSock)
+	assert len(manager) == 1 
+
+	newSock.status.addStatus(CONST.STATUS_WF)
+	newSock.dump()
+
+	manager.select()
+	print '-' * 20, 'test done', '-' * 20
+	print '=' * 60
+
 try:
 	testAddSocket()
+	testConnectedJob()
 except:
 	print "-"*20 +  'Exception' + '-'* 20
 	print traceback.print_exc()
