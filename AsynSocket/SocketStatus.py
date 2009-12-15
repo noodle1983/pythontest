@@ -28,7 +28,7 @@ send workflow:
 	send job: send all and set CONST.STATUS_D = 0 and CONST.STATUS_WF = 0
 """
 CONST.STATUS_SEL_READ_MASK = CONST.STATUS_RF | CONST.STATUS_UD
-CONST.STATUS_Sel_READ_CON = CONST.STATUS_N
+CONST.STATUS_SEL_READ_CON = CONST.STATUS_N
 """
 receive workflow:
 	related status: CONST.STATUS_RF. initialized 0;

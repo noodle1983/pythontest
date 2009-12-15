@@ -5,7 +5,6 @@ import sys
 import os
 sys.path.append(os.getcwd() + '/../')
 sys.path.append(os.getcwd() + '/')
-from Logger.logger import Logger 
 
 class Processor:
 	
@@ -47,7 +46,6 @@ class Processor:
 					continue
 				action = self._actionQueue.pop(0)	
 			action()	
-		Logger().debug("[svc] stop.")
 
 if __name__ == '__main__':
 	from Action import Action as Action

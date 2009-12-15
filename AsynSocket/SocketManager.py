@@ -11,28 +11,33 @@ class SocketManager:
 		self.processor = theProcessor
 
 		self.thread = threading.Thread(target=self.run)
-		self.running = True
-		self.thread.start()
+		self.running = False
 
 		self.socketByFd = {} 
 		self.lock = threading.RLock()
 
+	def __len__(self):
+		return len(self.socketByFd)
+
 	def addSocket(self, theFd, theSocket):
-		orgSocket = self.socketByFd.get(fd)
+		orgSocket = self.socketByFd.get(theFd)
 		if orgSocket is None :
 			with self.lock:
-				self.socketByFd[fd] = theSocket
+				self.socketByFd[theFd] = theSocket
 		elif orgSocket.status.has(CONST.STATUS_UD):
 			with self.lock:
-				self.socketByFd[fd] = theSocket
+				self.socketByFd[theFd] = theSocket
 		else:
-			raise socket.error(errno.EBADF, "SocketPool", "bad file descriptor")	
+			raise socket.error(errno.EBADF, "SocketManager", "bad file descriptor")	
 
 	def clean(self):
 		with self.lock:
 			self.socketByFd = \
 					dict([(k, v) for (k, v) in self.socketByFd.items() if not v.status.has(CONST.STATUS_UD)])
 
+	def start(self):
+		self.running = True
+		self.thread.start()
 
 	def stop(self):
 		self.running = False
@@ -57,20 +62,20 @@ class SocketManager:
 				continue
 
 	def select(self):
-		(rCandidate, wCandidate, eCandidate) = self.socketPool.getSelectFds()
+		(rCandidate, wCandidate, eCandidate) = self.getSelectFds()
 		if not rCandidate and not wCandidate and not eCandidate:
 			return ([], [], [])
 		(rReadys, wReadys, eReadys) = select.select(rCandidate, wCandidate, eCandidate, 1)
 		for fd in rReadys:
-			self.socketPool[fd].status.addStatus(CONST.STATUS_RF)
+			self.socketByFd[fd].status.addStatus(CONST.STATUS_RF)
 		for fd in wReadys:
-			self.socketPool[fd].status.addStatus(CONST.STATUS_WF)
+			self.socketByFd[fd].status.addStatus(CONST.STATUS_WF)
 
 		eJobs = []
 		for fd in eReadys:
-			ejobs.append(self.socketPool[fd].reportError)
+			ejobs.append(self.socketByFd[fd].reportError)
 
-		(rJobs, wJobs) = self.socketPool.genJobs()
+		(rJobs, wJobs) = self.genJobs()
 		return (rJobs, wJobs, eJobs)
 
 	def getSelectFds(self):
@@ -86,7 +91,7 @@ class SocketManager:
 					rCandidate.append(fd)
 				if (sock.status.get() & CONST.STATUS_SEL_WRITE_MASK) == CONST.STATUS_SEL_WRITE_CON:
 					wCandidate.append(fd)
-				if not v.status.has(CONST.STATUS_UD | CONST.STATUS_E)]:
+				if not v.status.has(CONST.STATUS_UD | CONST.STATUS_E):
 					eCandidate.append(fd)
 		return (rCandidate, wCandidate, eCandidate)
 
