@@ -41,7 +41,6 @@ set noequalalways
 set foldopen=block,hor,mark,percent,quickfix,tag
 set helplang=en
 set hlsearch
-set ignorecase
 set nomodeline
 set ruler
 set shiftwidth=4
@@ -57,22 +56,30 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +2 AsynSocket/TestSocketManager.py
-badd +1 AsynSocket/SocketManager.py
-badd +0 AsynSocket/AsynClientSocket.py
+badd +53 AsynSocket/TestSocketManager.py
+badd +99 AsynSocket/SocketManager.py
+badd +73 AsynSocket/AsynClientSocket.py
+badd +49 AsynSocket/Processor.py
 silent! argdel *
-edit AsynSocket/AsynClientSocket.py
+edit AsynSocket/Processor.py
 set splitbelow splitright
+wincmd _ | wincmd |
+vsplit
+1wincmd h
 wincmd _ | wincmd |
 split
 1wincmd k
+wincmd w
 wincmd w
 set nosplitbelow
 set nosplitright
 wincmd t
 set winheight=1 winwidth=1
 exe '1resize ' . ((&lines * 1 + 20) / 41)
+exe 'vert 1resize ' . ((&columns * 119 + 75) / 150)
 exe '2resize ' . ((&lines * 37 + 20) / 41)
+exe 'vert 2resize ' . ((&columns * 119 + 75) / 150)
+exe 'vert 3resize ' . ((&columns * 30 + 75) / 150)
 argglobal
 enew
 file -TabBar-
@@ -267,16 +274,229 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-let s:l = 1 - ((0 * winheight(0) + 18) / 37)
+12
+normal zo
+16
+normal zo
+22
+normal zo
+26
+normal zo
+28
+normal zo
+26
+normal zo
+32
+normal zo
+33
+normal zo
+32
+normal zo
+37
+normal zo
+38
+normal zo
+37
+normal zo
+42
+normal zo
+43
+normal zo
+35
+normal zo
+25
+normal zo
+26
+normal zo
+25
+normal zo
+35
+normal zo
+43
+normal zo
+44
+normal zo
+45
+normal zo
+47
+normal zo
+44
+normal zo
+50
+normal zo
+52
+normal zo
+43
+normal zo
+42
+normal zo
+12
+normal zo
+60
+normal zo
+61
+normal zo
+64
+normal zo
+61
+normal zo
+67
+normal zo
+68
+normal zo
+67
+normal zo
+71
+normal zo
+72
+normal zo
+71
+normal zo
+75
+normal zo
+79
+normal zo
+60
+normal zo
+83
+normal zo
+84
+normal zo
+86
+normal zo
+91
+normal zo
+83
+normal zo
+let s:l = 91 - ((35 * winheight(0) + 18) / 37)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+91
+normal! 02l
+wincmd w
+argglobal
+enew
+file __Tag_List__
+let s:cpo_save=&cpo
+set cpo&vim
+inoremap <buffer> <silent> <kMultiply> :silent! %foldopen!
+inoremap <buffer> <silent> <kMinus> :silent! foldclose
+inoremap <buffer> <silent> <kPlus> :silent! foldopen
+nnoremap <buffer> <silent> * :silent! %foldopen!
+nnoremap <buffer> <silent> + :silent! foldopen
+nnoremap <buffer> <silent> - :silent! foldclose
+nnoremap <buffer> <silent> = :silent! %foldclose
+nnoremap <buffer> <silent> q :close
+nnoremap <buffer> <silent> <kMultiply> :silent! %foldopen!
+nnoremap <buffer> <silent> <kMinus> :silent! foldclose
+nnoremap <buffer> <silent> <kPlus> :silent! foldopen
+inoremap <buffer> <silent> * :silent! %foldopen!
+inoremap <buffer> <silent> + :silent! foldopen
+inoremap <buffer> <silent> - :silent! foldclose
+inoremap <buffer> <silent> = :silent! %foldclose
+inoremap <buffer> <silent> q :close
+let &cpo=s:cpo_save
+unlet s:cpo_save
+setlocal autoindent
+setlocal nobinary
+setlocal bufhidden=delete
+setlocal nobuflisted
+setlocal buftype=nofile
+setlocal nocindent
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinoptions=
+setlocal cinwords=if,else,while,do,for,switch
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
+setlocal complete=.,w,b,u,t,i
+setlocal completefunc=
+setlocal nocopyindent
+setlocal nocursorcolumn
+setlocal nocursorline
+setlocal define=
+setlocal dictionary=
+setlocal nodiff
+setlocal equalprg=
+setlocal errorformat=
+setlocal noexpandtab
+if &filetype != 'taglist'
+setlocal filetype=taglist
+endif
+setlocal foldcolumn=3
+setlocal foldenable
+setlocal foldexpr=0
+setlocal foldignore=#
+set foldlevel=100
+setlocal foldlevel=9999
+setlocal foldmarker={{{,}}}
+set foldmethod=indent
+setlocal foldmethod=manual
+setlocal foldminlines=0
+setlocal foldnestmax=20
+setlocal foldtext=v:folddashes.getline(v:foldstart)
+setlocal formatexpr=
+setlocal formatoptions=tcq
+setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
+setlocal grepprg=
+setlocal iminsert=0
+setlocal imsearch=0
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal noinfercase
+setlocal iskeyword=@,48-57,_,192-255
+setlocal keywordprg=
+setlocal nolinebreak
+setlocal nolisp
+setlocal nolist
+setlocal makeprg=
+setlocal matchpairs=(:),{:},[:]
+setlocal nomodeline
+setlocal nomodifiable
+setlocal nrformats=octal,hex
+set number
+setlocal nonumber
+setlocal numberwidth=4
+setlocal omnifunc=
+setlocal path=
+setlocal nopreserveindent
+setlocal nopreviewwindow
+setlocal quoteescape=\\
+setlocal noreadonly
+setlocal noscrollbind
+setlocal shiftwidth=4
+setlocal noshortname
+setlocal smartindent
+setlocal softtabstop=0
+setlocal nospell
+setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
+setlocal spellfile=
+setlocal spelllang=en
+setlocal statusline=
+setlocal suffixesadd=
+setlocal noswapfile
+setlocal synmaxcol=3000
+if &syntax != 'taglist'
+setlocal syntax=taglist
+endif
+setlocal tabstop=4
+setlocal tags=
+setlocal textwidth=0
+setlocal thesaurus=
+setlocal nowinfixheight
+set winfixwidth
+setlocal winfixwidth
+setlocal nowrap
+setlocal wrapmargin=0
 wincmd w
 2wincmd w
 exe '1resize ' . ((&lines * 1 + 20) / 41)
+exe 'vert 1resize ' . ((&columns * 119 + 75) / 150)
 exe '2resize ' . ((&lines * 37 + 20) / 41)
+exe 'vert 2resize ' . ((&columns * 119 + 75) / 150)
+exe 'vert 3resize ' . ((&columns * 30 + 75) / 150)
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
