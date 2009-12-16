@@ -39,7 +39,7 @@ def testConnectedJob():
 	assert len(manager) == 1 
 
 	newSock.status.addStatus(CONST.STATUS_WF)
-	newSock.dump()
+	print newSock.dump()
 
 	manager.select()
 	print '-' * 20, 'test done', '-' * 20

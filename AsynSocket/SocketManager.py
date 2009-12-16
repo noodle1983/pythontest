@@ -4,6 +4,7 @@ import time
 import errno
 import CONST
 import SocketStatus
+import select
 
 class SocketManager:
 
@@ -91,7 +92,7 @@ class SocketManager:
 					rCandidate.append(fd)
 				if (sock.status.get() & CONST.STATUS_SEL_WRITE_MASK) == CONST.STATUS_SEL_WRITE_CON:
 					wCandidate.append(fd)
-				if not v.status.has(CONST.STATUS_UD | CONST.STATUS_E):
+				if not sock.status.has(CONST.STATUS_UD | CONST.STATUS_E):
 					eCandidate.append(fd)
 		return (rCandidate, wCandidate, eCandidate)
 

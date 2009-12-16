@@ -155,7 +155,6 @@ class AsynClientSocket:
 			self.reportError("receiving error!\n" + str(e))
 			return
 
-
 	def dump(self):
 		return self.status.dump()
 
