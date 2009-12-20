@@ -11,7 +11,7 @@ class SocketManager:
 	def __init__(self, theProcessor):
 		self.processor = theProcessor
 
-		self.thread = threading.Thread(target=self.run)
+		self.thread = threading.Thread(target=self.svc)
 		self.running = False
 
 		self.socketByFd = {} 
@@ -46,7 +46,7 @@ class SocketManager:
 		for sock in self.socketByFd.values():
 			sock.close()
 
-	def run(self):
+	def svc(self):
 		while self.running:
 			try:
 				(rJobs, wJobs, eJobs) = self.select()

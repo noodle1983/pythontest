@@ -65,7 +65,6 @@ class AsynClientSocket:
 		self.sock.setblocking(0)
 		self.status = SocketStatus.SocketStatus()
 
-		self.keepAlive = True
 		self.connector = AsynConnector(self.sock)
 
 		self.recvBuffer = BipBuffer(1024*1024)
@@ -75,21 +74,18 @@ class AsynClientSocket:
 	def connect(self, host,	port, timeout = 3):
 		self.addr = (host, port)
 		self.status.set()
-		retCon = False
-		try:
-			retCon = self.connector.connect(self.addr, timeout)
-		except socket.error, e:
-			self.reportError("connecting error:\n" + str(e))
-			return
+		retCon = self.connector.connect(self.addr, timeout)
 		if retCon:
 			self.status.addStatus(CONST.STATUS_C)
 
-	def checkConnection(self):
+	def checkConnected(self):
 		if not self.connector.isConnected(self.status.get()):
 			if self.connector.hasError(self.status.get()):
 				self.reportError("connecting error!\n")
 		elif not (self.status.get()& CONST.STATUS_C):
 			self.status.addStatus(CONST.STATUS_C)
+			return True
+		return False
 
 	def close(self):
 		self.sock.close()
@@ -101,10 +97,6 @@ class AsynClientSocket:
 		print "error occur:", strerror
 		self.status.addStatus(CONST.STATUS_E)
 		self.sock.close()
-#		if self.keepAlive:
-#			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#			self.sock.setblocking(0)
-#			self.connect(self.addr[0], self.addr[1])
 		
 	def getFileNo(self):
 		return self.sock.fileno()
