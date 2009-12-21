@@ -1,4 +1,4 @@
-from SocketManager import SocketManager
+from ConnectionManager import ConnectionManager
 from AsynClientSocket import AsynClientSocket
 import SocketStatus
 import CONST
@@ -15,7 +15,7 @@ def testAddSocket():
 	print '=' * 60
 	print '-' * 20, 'testAddSocket', '-'* 20
 	processor = Processor()
-	manager = SocketManager(processor)
+	manager = ConnectionManager(processor)
 
 	newSock = AsynClientSocket()
 	manager.addSocket(newSock.getFileNo(), newSock)
@@ -32,7 +32,7 @@ def testConnectedJob():
 	print '=' * 60
 	print '-' * 20, 'testConnectedJob', '-'* 20
 	processor = Processor()
-	manager = SocketManager(processor)
+	manager = ConnectionManager(processor)
 
 	newSock = AsynClientSocket()
 	manager.addSocket(newSock.getFileNo(), newSock)

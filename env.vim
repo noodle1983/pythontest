@@ -57,11 +57,12 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +53 AsynSocket/TestSocketManager.py
-badd +99 AsynSocket/SocketManager.py
+badd +16 AsynSocket/SocketManager.py
 badd +73 AsynSocket/AsynClientSocket.py
-badd +49 AsynSocket/Processor.py
+badd +1 AsynSocket/Processor.py
+badd +27 AsynSocket/SocketConnection.py
 silent! argdel *
-edit AsynSocket/Processor.py
+edit AsynSocket/SocketManager.py
 set splitbelow splitright
 wincmd _ | wincmd |
 vsplit
@@ -274,106 +275,12 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-12
-normal zo
-16
-normal zo
-22
-normal zo
-26
-normal zo
-28
-normal zo
-26
-normal zo
-32
-normal zo
-33
-normal zo
-32
-normal zo
-37
-normal zo
-38
-normal zo
-37
-normal zo
-42
-normal zo
-43
-normal zo
-35
-normal zo
-25
-normal zo
-26
-normal zo
-25
-normal zo
-35
-normal zo
-43
-normal zo
-44
-normal zo
-45
-normal zo
-47
-normal zo
-44
-normal zo
-50
-normal zo
-52
-normal zo
-43
-normal zo
-42
-normal zo
-12
-normal zo
-60
-normal zo
-61
-normal zo
-64
-normal zo
-61
-normal zo
-67
-normal zo
-68
-normal zo
-67
-normal zo
-71
-normal zo
-72
-normal zo
-71
-normal zo
-75
-normal zo
-79
-normal zo
-60
-normal zo
-83
-normal zo
-84
-normal zo
-86
-normal zo
-91
-normal zo
-83
-normal zo
-let s:l = 91 - ((35 * winheight(0) + 18) / 37)
+let s:l = 33 - ((25 * winheight(0) + 18) / 37)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-91
-normal! 02l
+33
+normal! 0
 wincmd w
 argglobal
 enew

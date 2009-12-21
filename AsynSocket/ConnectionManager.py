@@ -6,7 +6,7 @@ import CONST
 import SocketStatus
 import select
 
-class SocketManager:
+class ConnectionManager:
 
 	def __init__(self, theProcessor):
 		self.processor = theProcessor
@@ -29,7 +29,7 @@ class SocketManager:
 			with self.lock:
 				self.socketByFd[theFd] = theSocket
 		else:
-			raise socket.error(errno.EBADF, "SocketManager", "bad file descriptor")	
+			raise socket.error(errno.EBADF, "ConnectionManager", "bad file descriptor")	
 
 	def clean(self):
 		with self.lock:
