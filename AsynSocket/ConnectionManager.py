@@ -14,27 +14,28 @@ class ConnectionManager:
 		self.thread = threading.Thread(target=self.svc)
 		self.running = False
 
-		self.socketByFd = {} 
+		self.connections = {} 
 		self.lock = threading.RLock()
 
 	def __len__(self):
-		return len(self.socketByFd)
+		return len(self.connections)
 
-	def addSocket(self, theFd, theSocket):
-		orgSocket = self.socketByFd.get(theFd)
-		if orgSocket is None :
+	def addConnection(self, theFd, theConnection):
+		orgConnection = self.connections.get(theFd)
+		if orgConnection is None :
 			with self.lock:
-				self.socketByFd[theFd] = theSocket
-		elif orgSocket.status.has(CONST.STATUS_UD):
+				self.connections[theFd] = theConnection
+		elif orgConnection.status.has(CONST.STATUS_UD):
 			with self.lock:
-				self.socketByFd[theFd] = theSocket
+				self.connections[theFd] = theConnection
 		else:
-			raise socket.error(errno.EBADF, "ConnectionManager", "bad file descriptor")	
+			orgConnection.reportError("file descriptor duplicated!")
+			theConnection.reportError("file descriptor duplicated!")
 
 	def clean(self):
 		with self.lock:
-			self.socketByFd = \
-					dict([(k, v) for (k, v) in self.socketByFd.items() if not v.status.has(CONST.STATUS_UD)])
+			self.connections = \
+					dict([(k, v) for (k, v) in self.connections.items() if not v.status.has(CONST.STATUS_UD)])
 
 	def start(self):
 		self.running = True
@@ -43,8 +44,8 @@ class ConnectionManager:
 	def stop(self):
 		self.running = False
 		self.thread.join()
-		for sock in self.socketByFd.values():
-			sock.close()
+		for con in self.connections.values():
+			con.close()
 
 	def svc(self):
 		while self.running:
@@ -68,13 +69,13 @@ class ConnectionManager:
 			return ([], [], [])
 		(rReadys, wReadys, eReadys) = select.select(rCandidate, wCandidate, eCandidate, 1)
 		for fd in rReadys:
-			self.socketByFd[fd].status.addStatus(CONST.STATUS_RF)
+			self.connections[fd].status.addStatus(CONST.STATUS_RF)
 		for fd in wReadys:
-			self.socketByFd[fd].status.addStatus(CONST.STATUS_WF)
+			self.connections[fd].status.addStatus(CONST.STATUS_WF)
 
 		eJobs = []
 		for fd in eReadys:
-			ejobs.append(self.socketByFd[fd].reportError)
+			ejobs.append(self.connections[fd].reportError)
 
 		(rJobs, wJobs) = self.genJobs()
 		return (rJobs, wJobs, eJobs)
@@ -87,7 +88,7 @@ class ConnectionManager:
 		wCandidate = []
 		eCandidate = []
 		with self.lock:
-			for (fd, sock) in self.socketByFd.items():
+			for (fd, sock) in self.connections.items():
 				if (sock.status.get() & CONST.STATUS_SEL_READ_MASK) == CONST.STATUS_SEL_READ_CON :
 					rCandidate.append(fd)
 				if (sock.status.get() & CONST.STATUS_SEL_WRITE_MASK) == CONST.STATUS_SEL_WRITE_CON:
@@ -100,7 +101,7 @@ class ConnectionManager:
 		rJobs = []
 		wJobs = []
 		with self.lock:
-			for (fd, sock) in self.socketByFd.items():
+			for (fd, sock) in self.connections.items():
 				if sock.status.has(CONST.STATUS_UD | CONST.STATUS_E): 
 					continue
 				if sock.status.has(CONST.STATUS_RF):

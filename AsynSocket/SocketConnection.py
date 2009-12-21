@@ -13,6 +13,9 @@ class SocketConnection:
 		"""
 		self.sock = theSocket
 		self.fd = theSocket.getFileNo()
+		self.status = theSocket.status
+		self.close = theSocket.close
+
 		self.proto = theProtocol
 		self.prcssr = theProcessor
 
