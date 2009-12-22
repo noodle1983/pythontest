@@ -17,15 +17,15 @@ class SocketConnection:
 		self.close = theSocket.close
 
 		self.proto = theProtocol
-		self.prcssr = theProcessor
+		self.processor = theProcessor
 
 	def checkConnected(self):	
 		if (self.sock.checkConnected()):
-			theProcessor.process(self.fd, self.proto.OnConnected)
+			theProcessor.process(self.fd, self.proto.handleConnected)
 
-	def reportError(self, strError): 
+	def reportError(self, strError = ""): 
 		self.sock.reportError(strError)
-		self.proto.OnError(strError)
+		self.proto.handleError(strError)
 
 	def connect(self, addr, port):
 		try:
@@ -39,5 +39,15 @@ class SocketConnection:
 		except:
 			self.reportError("bad file descriptor:\n" + str(e))
 			return 0
+	
+	def genJobs(self):
+		if sock.status.has(CONST.STATUS_EF):
+			self.processor.process(self.fd, self.reportError)
+		if sock.status.has(CONST.STATUS_UD | CONST.STATUS_E): 
+			continue
+		if sock.status.has(CONST.STATUS_RF):
+			self.processor.processList(self.fd + 1, [self.sock.recvImpl, self.proto.handleInput])
+		if sock.status.has(CONST.STATUS_WF) and sock.status.has(CONST.STATUS_D):
+			self.processor.process(self.fd + 2, self.sock.sendImpl)
 
 
