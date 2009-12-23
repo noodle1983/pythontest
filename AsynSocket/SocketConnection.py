@@ -42,6 +42,7 @@ class SocketConnection:
 			self.reportError("close error:\n" + str(e))
 
 	def send(self, package, len):
+		#todo lock
 		self.sendBuffer.write(package, len)
 		self.status.addStatus(CONST.STATUS_D)
 	
@@ -54,6 +55,7 @@ class SocketConnection:
 	def recvImpl(self):
 		try:
 			self.sock.recvImpl()
+			self.processor.process(self.fd + 3, self.proto.handleInput)
 		except socket.error, e:
 			self.reportError("recv error!") 
 
@@ -79,7 +81,7 @@ class SocketConnection:
 		if sock.status.has(CONST.STATUS_UD | CONST.STATUS_E): 
 			return
 		if sock.status.has(CONST.STATUS_RF):
-			self.processor.processList(self.fd + 1, [self.recvImpl, self.proto.handleInput])
+			self.processor.process(self.fd + 1, self.recvImpl)
 		if sock.status.has(CONST.STATUS_WF) and sock.status.has(CONST.STATUS_D):
 			self.processor.process(self.fd + 2, self.sock.sendImpl)
 
