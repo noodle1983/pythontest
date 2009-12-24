@@ -1,4 +1,9 @@
 from AsynClientSocket import AsynClientSocket
+from BipBuffer import BipBuffer
+import threading
+
+import SocketStatus
+import CONST
 
 class SocketConnection:
 	"""
@@ -13,6 +18,7 @@ class SocketConnection:
 		"""
 		self.recvBuffer = BipBuffer(1024*1024)
 		self.sendBuffer = BipBuffer(1024*1024)
+		self.sendLock = threading.RLock()
 
 		self.sock = theSocket
 		self.sock.setBuffer(self.recvBuffer, self.sendBuffer)
@@ -30,9 +36,14 @@ class SocketConnection:
 		try:
 			self.sock.connect(addr, port)
 			if self.sock.status.has(CONST.STATUS_C):
-				theProcessor.process(self.fd, self.proto.handleConnected)
+				self.handleConnected()
 		except socket.error, e:
 			self.reportError("connecting error:\n" + str(e))
+	
+	def handleConnected(self):
+		self.sendBuffer.reset()
+		self.recvBuffer.reset()
+		self.processor.process(self.fd, self.proto.handleConnected)
 
 	def close(self):
 		try:
@@ -42,8 +53,10 @@ class SocketConnection:
 			self.reportError("close error:\n" + str(e))
 
 	def send(self, package, len):
-		#todo lock
-		self.sendBuffer.write(package, len)
+		if not self.status.has(CONST.STATUS_C):
+			raise socket.error(errno.EBADF, "SocketConnection.send", "not connected!")	
+		with self.sendLock:
+			self.sendBuffer.write(package, len)
 		self.status.addStatus(CONST.STATUS_D)
 	
 	def sendImpl(self):
@@ -59,7 +72,7 @@ class SocketConnection:
 		except socket.error, e:
 			self.reportError("recv error!") 
 
-	def getFd(self)
+	def getFd(self):
 		try:
 			return self.sock.getFileNo()
 		except:
@@ -73,16 +86,16 @@ class SocketConnection:
 				return
 			if self.sock.connector.isConnected(self.status.get()):
 				self.status.addStatus(CONST.STATUS_C)
-				theProcessor.process(self.fd, self.proto.handleConnected)
+				self.handleConnected()
 
-		if sock.status.has(CONST.STATUS_EF):
+		if self.sock.status.has(CONST.STATUS_EF):
 			self.reportError("socket error!\n")
 
-		if sock.status.has(CONST.STATUS_UD | CONST.STATUS_E): 
+		if self.sock.status.has(CONST.STATUS_UD | CONST.STATUS_E): 
 			return
-		if sock.status.has(CONST.STATUS_RF):
+		if self.sock.status.has(CONST.STATUS_RF):
 			self.processor.process(self.fd + 1, self.recvImpl)
-		if sock.status.has(CONST.STATUS_WF) and sock.status.has(CONST.STATUS_D):
+		if self.sock.status.has(CONST.STATUS_WF) and self.sock.status.has(CONST.STATUS_D):
 			self.processor.process(self.fd + 2, self.sock.sendImpl)
 
 

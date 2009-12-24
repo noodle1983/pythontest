@@ -31,6 +31,11 @@ nmap <Nul>t :scs find t =expand("<cword>")
 nmap <Nul>c :scs find c =expand("<cword>")	
 nmap <Nul>g :scs find g =expand("<cword>")	
 nmap <Nul>s :scs find s =expand("<cword>")	
+nmap <F11> :TrinityToggleNERDTree 
+nmap <F10> :TrinityToggleTagList 
+nmap <F9> :TrinityToggleSourceExplorer 
+nmap <F8> :TrinityToggleAll 
+map <F2> :WMToggle
 let &cpo=s:cpo_save
 unlet s:cpo_save
 set autoindent
@@ -46,8 +51,7 @@ set ruler
 set shiftwidth=4
 set smartindent
 set tabstop=4
-set tags=/usr/bin/ctags
-set wildignore=*.pyc
+set window=32
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
@@ -56,12 +60,11 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +25 file.list
-badd +1 AsynSocket/TestConnectionManager.py
-badd +48 AsynSocket/ConnectionManager.py
-badd +17 AsynSocket/SocketConnection.py
-args file.list
-edit AsynSocket/SocketConnection.py
+badd +17 AsynSocket/BipBuffer.py
+badd +81 AsynSocket/ConnectionManager.py
+badd +1 AsynSocket/SocketConnection.py
+silent! argdel *
+edit AsynSocket/ConnectionManager.py
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -71,8 +74,8 @@ set nosplitbelow
 set nosplitright
 wincmd t
 set winheight=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 20) / 41)
-exe '2resize ' . ((&lines * 37 + 20) / 41)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 argglobal
 enew
 file -TabBar-
@@ -182,11 +185,11 @@ setlocal bufhidden=
 setlocal buflisted
 setlocal buftype=
 setlocal nocindent
-setlocal cinkeys=0{,0},0),:,!^F,o,O,e
+setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
 setlocal cinoptions=
 setlocal cinwords=if,else,while,do,for,switch
-setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:XCOMM,n:>,fb:-
-setlocal commentstring=#%s
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
+setlocal commentstring=/*%s*/
 setlocal complete=.,w,b,u,t,i
 setlocal completefunc=
 setlocal nocopyindent
@@ -219,10 +222,10 @@ setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
 setlocal grepprg=
 setlocal iminsert=0
 setlocal imsearch=0
-setlocal include=s*\\(from\\|import\\)
-setlocal includeexpr=substitute(v:fname,'\\.','/','g')
-setlocal indentexpr=GetPythonIndent(v:lnum)
-setlocal indentkeys=0{,0},:,!^F,o,O,e,<:>,=elif,=except
+setlocal include=
+setlocal includeexpr=
+setlocal indentexpr=
+setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
 setlocal noinfercase
 setlocal iskeyword=@,48-57,_,192-255
 setlocal keywordprg=
@@ -237,7 +240,7 @@ setlocal nrformats=octal,hex
 set number
 setlocal number
 setlocal numberwidth=4
-setlocal omnifunc=pythoncomplete#Complete
+setlocal omnifunc=
 setlocal path=
 setlocal nopreserveindent
 setlocal nopreviewwindow
@@ -253,7 +256,7 @@ setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
 setlocal spellfile=
 setlocal spelllang=en
 setlocal statusline=
-setlocal suffixesadd=.py
+setlocal suffixesadd=
 setlocal swapfile
 setlocal synmaxcol=3000
 if &syntax != 'python'
@@ -267,22 +270,20 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-4
+11
 normal zo
-9
+11
 normal zo
-4
-normal zo
-let s:l = 17 - ((16 * winheight(0) + 18) / 37)
+let s:l = 9 - ((8 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-17
-normal! 029l
+9
+normal! 010l
 wincmd w
 2wincmd w
-exe '1resize ' . ((&lines * 1 + 20) / 41)
-exe '2resize ' . ((&lines * 37 + 20) / 41)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

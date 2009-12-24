@@ -48,7 +48,7 @@ class ConnectionManager:
 	def svc(self):
 		while self.running:
 			try:
-				if self.select()
+				if self.select():
 					self.genJobs()
 				else:
 					self.clean()
