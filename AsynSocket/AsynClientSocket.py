@@ -93,7 +93,6 @@ class AsynClientSocket:
 
 	def close(self):
 		self.sock.close()
-		self.sock.status.set()
 		
 	def reportError(self, strerror):
 		"AsynClientSocket::reportError"

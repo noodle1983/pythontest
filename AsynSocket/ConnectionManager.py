@@ -62,8 +62,10 @@ class ConnectionManager:
 		(rCandidate, wCandidate, eCandidate) = self.getSelectFds()
 		if not rCandidate and not wCandidate and not eCandidate:
 			return False
+		print "[ConnectionManager.select]Candidate:", rCandidate, wCandidate, eCandidate 
 		(rReadys, wReadys, eReadys) = select.select(rCandidate, wCandidate, eCandidate, 1)
 
+		print "[ConnectionManager.select]Ready:", rReadys, wReadys, eReadys 
 		for fd in rReadys:
 			self.connections[fd].status.addStatus(CONST.STATUS_RF)
 		for fd in wReadys:
@@ -81,9 +83,14 @@ class ConnectionManager:
 		eCandidate = []
 		with self.lock:
 			for (fd, sock) in self.connections.items():
+				if sock.status.get() == CONST.STATUS_N:
+					rCandidate.append(fd)
+					wCandidate.append(fd)
+					eCandidate.append(fd)
+					continue
 				if (sock.status.get() & CONST.STATUS_SEL_READ_MASK) == CONST.STATUS_SEL_READ_CON :
 					rCandidate.append(fd)
-				if (sock.status.get() & CONST.STATUS_SEL_WRITE_MASK) == CONST.STATUS_SEL_WRITE_CON:
+				if (sock.status.get() & CONST.STATUS_SEL_WRITE_MASK) == CONST.STATUS_SEL_WRITE_CON :
 					wCandidate.append(fd)
 				if not sock.status.has(CONST.STATUS_UD | CONST.STATUS_E | CONST.STATUS_EF):
 					eCandidate.append(fd)

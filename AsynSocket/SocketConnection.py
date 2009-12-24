@@ -83,6 +83,7 @@ class SocketConnection:
 			return 0
 	
 	def genJobs(self):
+		print "[SocketConnection.genJobs]", self.sock.dump()
 		if not self.sock.status.has(CONST.STATUS_C):
 			if self.sock.connector.hasError(self.status.get()):
 				self.reportError("connecting error!\n")
