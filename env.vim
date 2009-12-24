@@ -51,7 +51,6 @@ set ruler
 set shiftwidth=4
 set smartindent
 set tabstop=4
-set window=32
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
@@ -60,11 +59,13 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +17 AsynSocket/BipBuffer.py
-badd +81 AsynSocket/ConnectionManager.py
-badd +1 AsynSocket/SocketConnection.py
+badd +27 AsynSocket/BipBuffer.py
+badd +9 AsynSocket/ConnectionManager.py
+badd +99 AsynSocket/SocketConnection.py
+badd +130 AsynSocket/TestConnectionManager.py
+badd +113 AsynSocket/AsynClientSocket.py
 silent! argdel *
-edit AsynSocket/ConnectionManager.py
+edit AsynSocket/TestConnectionManager.py
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -270,16 +271,30 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-11
+9
 normal zo
-11
+13
 normal zo
-let s:l = 9 - ((8 * winheight(0) + 14) / 29)
+15
+normal zo
+13
+normal zo
+9
+normal zo
+56
+normal zo
+81
+normal zo
+107
+normal zo
+137
+normal zo
+let s:l = 127 - ((11 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-9
-normal! 010l
+127
+normal! 063l
 wincmd w
 2wincmd w
 exe '1resize ' . ((&lines * 1 + 16) / 33)

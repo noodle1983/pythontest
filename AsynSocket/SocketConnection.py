@@ -1,6 +1,8 @@
 from AsynClientSocket import AsynClientSocket
 from BipBuffer import BipBuffer
 import threading
+import socket
+import errno
 
 import SocketStatus
 import CONST
@@ -66,6 +68,7 @@ class SocketConnection:
 			self.reportError("send error!") 
 	
 	def recvImpl(self):
+		"SocketConnection.recvImpl"
 		try:
 			self.sock.recvImpl()
 			self.processor.process(self.fd + 3, self.proto.handleInput)

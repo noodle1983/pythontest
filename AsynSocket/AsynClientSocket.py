@@ -111,7 +111,7 @@ class AsynClientSocket:
 		self.status.addStatus(CONST.STATUS_D)
 
 	def sendImpl(self):
-		"AsynClientSocket::sendImpl"
+		"AsynClientSocket.sendImpl"
 		try:
 			while True:
 				(package, len) = self.sendBuffer.read_reserve()	

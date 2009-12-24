@@ -10,8 +10,11 @@ class Processor:
 		self.list = []
 
 	def dump(self):
+		dumpStr = "["
 		for i in range(0, len(self.list)):
-			print i, self.list[i].__doc__
+			dumpStr += "job %d:%s; "% (i, self.list[i].func_name)
+		dumpStr += "]"
+		return dumpStr	
 
 	def process(self, fd, job):
 		self.list.append(job)
@@ -70,7 +73,7 @@ def testConnectedJob():
 	assert processor.list[-1].__doc__ == "Protocol.handleConnected"
 
 	print newSock.dump()
-	processor.dump()
+	print processor.dump()
 	print '-' * 20, 'test done', '-' * 20
 	print '=' * 60
 
@@ -89,19 +92,52 @@ def testSendJob():
 
 	newSock.status.addStatus(CONST.STATUS_WF)
 	connection.genJobs()
+	assert processor.list[-1].__doc__ == "Protocol.handleConnected"
 	connection.send("test", 5)
+	connection.genJobs()
+	assert processor.list[-1].__doc__ == "AsynClientSocket.sendImpl"
 
 	assert connection.status.has(CONST.STATUS_C)
 	print newSock.dump()
-	print processor.list[-1].__doc__
+	print processor.dump()
 	print '-' * 20, 'test done', '-' * 20
 	print '=' * 60
 
+def testRecvJob():
+	print '=' * 60
+	print '-' * 20, 'testRecvJob', '-'* 19
+	manager = ConnectionManager()
+	processor = Processor(4)
+	protocol = Protocol()
+	newSock = AsynClientSocket()
+	connection = SocketConnection(newSock, protocol, processor)
+	
+	manager.addConnection(newSock.getFileNo(), connection)
+
+	assert len(manager) == 1 
+
+	newSock.status.addStatus(CONST.STATUS_WF)
+	connection.genJobs()
+	print processor.list[-1].__doc__
+	assert processor.list[-1].__doc__ == "Protocol.handleConnected"
+
+	newSock.status.addStatus(CONST.STATUS_RF)
+	connection.genJobs()
+	print processor.list[-1].__doc__
+	assert processor.list[-1].__doc__ == "SocketConnection.recvImpl"
+
+
+	assert connection.status.has(CONST.STATUS_C)
+	print newSock.dump()
+	print processor.dump()
+	print '-' * 20, 'test done', '-' * 20
+	print '=' * 60
 
 try:
 	testAddSocket()
 	testConnectedJob()
 	testSendJob()
+	testRecvJob()
 except:
 	print "-"*20 +  'Exception' + '-'* 20
 	print traceback.print_exc()
