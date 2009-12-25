@@ -40,9 +40,10 @@ class SocketConnection:
 			if self.sock.status.has(CONST.STATUS_C):
 				self.handleConnected()
 		except socket.error, e:
-			self.reportError("connecting error:\n" + str(e))
+			self.reportError("[SocketConnection.connect]connecting error:" + str(e))
 	
 	def handleConnected(self):
+		self.sock.handleConnected()
 		self.sendBuffer.reset()
 		self.recvBuffer.reset()
 		self.processor.process(self.fd, self.proto.handleConnected)
@@ -52,7 +53,7 @@ class SocketConnection:
 			self.sock.close()
 			self.proto.close()
 		except socket.error, e:
-			self.reportError("close error:\n" + str(e))
+			self.reportError("[SocketConnection.close]close error:\n" + str(e))
 
 	def send(self, package, len):
 		if not self.status.has(CONST.STATUS_C):
@@ -65,7 +66,7 @@ class SocketConnection:
 		try:
 			self.sock.sendImpl()
 		except socket.error, e:
-			self.reportError("send error!") 
+			self.reportError("[SocketConnection.sendImpl]send error!") 
 	
 	def recvImpl(self):
 		"SocketConnection.recvImpl"
@@ -73,27 +74,27 @@ class SocketConnection:
 			self.sock.recvImpl()
 			self.processor.process(self.fd + 3, self.proto.handleInput)
 		except socket.error, e:
-			self.reportError("recv error!") 
+			self.reportError("[SocketConnection.recvImpl]recv error!") 
 
 	def getFd(self):
 		try:
 			return self.sock.getFileNo()
 		except:
-			self.reportError("bad file descriptor:\n" + str(e))
+			self.reportError("[SocketConnection.getFd]bad file descriptor:" + str(e))
 			return 0
 	
 	def genJobs(self):
 		print "[SocketConnection.genJobs]", self.sock.dump()
 		if not self.sock.status.has(CONST.STATUS_C):
 			if self.sock.connector.hasError(self.status.get()):
-				self.reportError("connecting error!\n")
+				self.reportError("[SocketConnection.genJobs]connecting error!\n")
 				return
 			if self.sock.connector.isConnected(self.status.get()):
 				self.status.addStatus(CONST.STATUS_C)
 				self.handleConnected()
 
 		if self.sock.status.has(CONST.STATUS_EF):
-			self.reportError("socket error!\n")
+			self.reportError("[SocketConnection.genJobs]socket error!\n")
 
 		if self.sock.status.has(CONST.STATUS_UD | CONST.STATUS_E): 
 			return

@@ -1,4 +1,5 @@
 import socket
+import threading
 import errno
 from BipBuffer import BipBuffer
 
@@ -23,24 +24,19 @@ class AsynConnector:
 
 	def __init__(self, theSock):
 		self.sock = theSock
-		self.countdowner = CountDowner(3)
 
 	def connect(self, addr, timeout):
-		self.countdowner.reset(timeout) 
 		try:
 			self.sock.connect(addr)
 		except socket.error, e:
 			if e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK):
-				print "connecting to ", addr 
+				print "[AsynConnector.connect]connecting to ", addr 
 				return False
 			else:
-				print "raise error:", e
+				print "[AsynConnector.connect]exception:", e
 				raise
 		return True
 	
-	def elapse(self, second = 1):
-		self.countdowner.decrease(second)
-
 	def isConnected(self, sockStatus):
 		return (sockStatus & CONST.STATUS_C)\
 				or ((sockStatus & CONST.STATUS_CONNECTED_MASK) == CONST.STATUS_CONNECTED_CON)
@@ -51,11 +47,8 @@ class AsynConnector:
 			return true if countdowner is done
 			return true if status has no connected flag and has read and write flag
 		"""
-		if self.countdowner.done():
-			print "connector timeout." 
-			return True
 		if (sockStatus & CONST.STATUS_E): 
-			print "connector error."
+			print "[AsynConnector.hasError]connector error."
 			return True
 
 class AsynClientSocket:
@@ -66,6 +59,7 @@ class AsynClientSocket:
 		self.status = SocketStatus.SocketStatus()
 
 		self.connector = AsynConnector(self.sock)
+		self.connectTimer = threading.Timer(5, self.handleConnectTimeout)
 
 		self.recvBuffer = BipBuffer(1024*1024)
 		self.recvBackupPackage = 0
@@ -81,11 +75,20 @@ class AsynClientSocket:
 		retCon = self.connector.connect(self.addr, timeout)
 		if retCon:
 			self.status.addStatus(CONST.STATUS_C)
+		else:
+			self.connectTimer.start()
+
+	def handleConnected(self):
+		self.connectTimer.cancel()
+
+	def handleConnectTimeout(self):
+		print "[AsynClientSocket.handleConnectTimeout]", self.addr
+		self.status.addStatus(CONST.STATUS_RF)
 
 	def checkConnectedEvent(self):
 		if not self.connector.isConnected(self.status.get()):
 			if self.connector.hasError(self.status.get()):
-				self.reportError("connecting error!\n")
+				self.reportError("[AsynClientSocket.checkConnectedEvent]connecting error!\n")
 		elif not (self.status.get()& CONST.STATUS_C):
 			self.status.addStatus(CONST.STATUS_C)
 			return True
@@ -97,7 +100,8 @@ class AsynClientSocket:
 	def reportError(self, strerror):
 		"AsynClientSocket::reportError"
 
-		print "error occur:", strerror
+		print strerror
+		self.connectTimer.cancel()
 		self.status.addStatus(CONST.STATUS_E)
 		self.status.rmStatus(CONST.STATUS_EF)
 		self.sock.close()
@@ -119,7 +123,7 @@ class AsynClientSocket:
 				sendedLen = self.sock.send(package)
 				self.sendBuffer.read_confirm(sendedLen)
 		except socket.error, e:
-			self.reportError("sending error!\n" + str(e))
+			self.reportError("[AsynClientSocket.sendImpl]sending error!\n" + str(e))
 			return
 		finally:
 			self.status.rmStatus(CONST.STATUS_WF|CONST.STATUS_D)	
@@ -141,14 +145,14 @@ class AsynClientSocket:
 				self.status.rmStatus(CONST.STATUS_RF)	
 			recvLen = len(buf)
 			if recvLen <= 0:
-				self.reportError("recv None buffer")
+				self.reportError("[AsynClientSocket.recvImpl]recv None buffer")
 				return
 			self.recvBuffer.write(buf, recvLen)
 		except socket.error, e:
 			if e.errno == errno.ENOBUFS:
 				self.recvBackupPackage = buf 
 				self.status.addStatus(CONST.STATUS_RF)	
-			self.reportError("receiving error!\n" + str(e))
+			self.reportError("[AsynClientSocket.recvImpl]recv exception:\n" + str(e))
 			return
 
 	def dump(self):

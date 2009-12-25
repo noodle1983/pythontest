@@ -27,8 +27,8 @@ class ConnectionManager:
 			with self.lock:
 				self.connections[theFd] = theConnection
 		else:
-			orgConnection.reportError("file descriptor duplicated!")
-			theConnection.reportError("file descriptor duplicated!")
+			orgConnection.reportError("[ConnectionManager.addConnection]file descriptor duplicated!")
+			theConnection.reportError("[ConnectionManager.addConnection]file descriptor duplicated!")
 
 	def clean(self):
 		with self.lock:

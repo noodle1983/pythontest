@@ -14,6 +14,11 @@ nmap <silent> \be :BufExplorer
 let s:cpo_save=&cpo
 set cpo&vim
 nmap gx <Plug>NetrwBrowseX
+map <F2> :WMToggle
+nmap <F8> :TrinityToggleAll 
+nmap <F9> :TrinityToggleSourceExplorer 
+nmap <F10> :TrinityToggleTagList 
+nmap <F11> :TrinityToggleNERDTree 
 nnoremap <silent> <Plug>NetrwBrowseX :call netrw#NetrwBrowseX(expand("<cWORD>"),0)
 nmap <Nul><Nul>d :vert scs find d =expand("<cword>")
 nmap <Nul><Nul>i :vert scs find i ^=expand("<cfile>")$	
@@ -31,11 +36,6 @@ nmap <Nul>t :scs find t =expand("<cword>")
 nmap <Nul>c :scs find c =expand("<cword>")	
 nmap <Nul>g :scs find g =expand("<cword>")	
 nmap <Nul>s :scs find s =expand("<cword>")	
-nmap <F11> :TrinityToggleNERDTree 
-nmap <F10> :TrinityToggleTagList 
-nmap <F9> :TrinityToggleSourceExplorer 
-nmap <F8> :TrinityToggleAll 
-map <F2> :WMToggle
 let &cpo=s:cpo_save
 unlet s:cpo_save
 set autoindent
@@ -51,6 +51,8 @@ set ruler
 set shiftwidth=4
 set smartindent
 set tabstop=4
+set tags=/usr/bin/ctags
+set wildignore=*.pyc
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
@@ -60,12 +62,14 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +27 AsynSocket/BipBuffer.py
-badd +9 AsynSocket/ConnectionManager.py
-badd +99 AsynSocket/SocketConnection.py
-badd +130 AsynSocket/TestConnectionManager.py
-badd +113 AsynSocket/AsynClientSocket.py
+badd +30 AsynSocket/ConnectionManager.py
+badd +1 AsynSocket/SocketConnection.py
+badd +94 AsynSocket/TestConnectionManager.py
+badd +82 AsynSocket/AsynClientSocket.py
+badd +56 AsynSocket/TestClient.py
+badd +16 AsynSocket/Selector.py
 silent! argdel *
-edit AsynSocket/TestConnectionManager.py
+edit AsynSocket/SocketConnection.py
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -75,8 +79,8 @@ set nosplitbelow
 set nosplitright
 wincmd t
 set winheight=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '1resize ' . ((&lines * 2 + 20) / 41)
+exe '2resize ' . ((&lines * 36 + 20) / 41)
 argglobal
 enew
 file -TabBar-
@@ -186,11 +190,11 @@ setlocal bufhidden=
 setlocal buflisted
 setlocal buftype=
 setlocal nocindent
-setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
+setlocal cinkeys=0{,0},0),:,!^F,o,O,e
 setlocal cinoptions=
 setlocal cinwords=if,else,while,do,for,switch
-setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:%,:XCOMM,n:>,fb:-
-setlocal commentstring=/*%s*/
+setlocal comments=s1:/*,mb:*,ex:*/,://,b:#,:XCOMM,n:>,fb:-
+setlocal commentstring=#%s
 setlocal complete=.,w,b,u,t,i
 setlocal completefunc=
 setlocal nocopyindent
@@ -223,10 +227,10 @@ setlocal formatlistpat=^\\s*\\d\\+[\\]:.)}\\t\ ]\\s*
 setlocal grepprg=
 setlocal iminsert=0
 setlocal imsearch=0
-setlocal include=
-setlocal includeexpr=
-setlocal indentexpr=
-setlocal indentkeys=0{,0},:,0#,!^F,o,O,e
+setlocal include=s*\\(from\\|import\\)
+setlocal includeexpr=substitute(v:fname,'\\.','/','g')
+setlocal indentexpr=GetPythonIndent(v:lnum)
+setlocal indentkeys=0{,0},:,!^F,o,O,e,<:>,=elif,=except
 setlocal noinfercase
 setlocal iskeyword=@,48-57,_,192-255
 setlocal keywordprg=
@@ -241,7 +245,7 @@ setlocal nrformats=octal,hex
 set number
 setlocal number
 setlocal numberwidth=4
-setlocal omnifunc=
+setlocal omnifunc=pythoncomplete#Complete
 setlocal path=
 setlocal nopreserveindent
 setlocal nopreviewwindow
@@ -257,7 +261,7 @@ setlocal spellcapcheck=[.?!]\\_[\\])'\"\	\ ]\\+
 setlocal spellfile=
 setlocal spelllang=en
 setlocal statusline=
-setlocal suffixesadd=
+setlocal suffixesadd=.py
 setlocal swapfile
 setlocal synmaxcol=3000
 if &syntax != 'python'
@@ -271,34 +275,62 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-9
+11
 normal zo
-13
+38
 normal zo
-15
+43
 normal zo
-13
+38
 normal zo
-9
+51
 normal zo
-56
+55
 normal zo
-81
+51
 normal zo
-107
+65
 normal zo
-137
+68
 normal zo
-let s:l = 127 - ((11 * winheight(0) + 14) / 29)
+65
+normal zo
+71
+normal zo
+76
+normal zo
+71
+normal zo
+79
+normal zo
+82
+normal zo
+79
+normal zo
+86
+normal zo
+88
+normal zo
+89
+normal zo
+88
+normal zo
+96
+normal zo
+86
+normal zo
+11
+normal zo
+let s:l = 92 - ((29 * winheight(0) + 18) / 36)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-127
-normal! 063l
+92
+normal! 040l
 wincmd w
 2wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '1resize ' . ((&lines * 2 + 20) / 41)
+exe '2resize ' . ((&lines * 36 + 20) / 41)
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

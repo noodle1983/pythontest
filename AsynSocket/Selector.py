@@ -13,6 +13,6 @@ class Selector:
 		for fd in wReadys:
 			self.socketPool[fd].status.addStatus(CONST.STATUS_WF)
 		for fd in eReadys:
-			self.socketPool[fd].reportError("select error")
+			self.socketPool[fd].reportError("[Selector.select]select error")
 
 		(rJobs, wJobs) = self.socketPool.genJobs()
