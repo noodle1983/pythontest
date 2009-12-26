@@ -22,9 +22,9 @@ class BipBuffer:
 
 		self.usingBufferB = False
 
-	def write(self, theBuff, n):
-		self.write_reserve(theBuff, n)
-		self.write_confirm(n)
+	def write(self, theBuff, wLen):
+		self.write_reserve(theBuff, wLen)
+		self.write_confirm(wLen)
 
 	def write_reserve(self, theBuff, n):
 		if self.usingBufferB:
@@ -71,40 +71,44 @@ class BipBuffer:
 		self.read_confirm(n)
 		return res
 
-	def readn_reserve(self, n):
+	def readn_reserve(self, rResrvLen):
 		if self.usingBufferB and self.rIndex == self.reIndex:
-			self._cancelBufferB()
-		if self.dataLen() >= n:
-			if self.reIndex - self.rIndex >= n:
-				return struct.unpack_from("%ds"%n, self.buff, self.rIndex)[0]
+			self._cancelBufferB(0)
+		if self.dataLen() >= rResrvLen:
+			if self.reIndex - self.rIndex >= rResrvLen:
+				return struct.unpack_from("%ds"%rResrvLen, self.buff, self.rIndex)[0]
 			else:
-				retBuffer = array.array('c', '\0' * n) 
+				retBuffer = array.array('c', '\0' * rResrvLen) 
 				lenSeg1 = self.reIndex - self.rIndex
 				struct.pack_into("%ds"%lenSeg1, retBuffer, 0, struct.unpack_from("%ds"%lenSeg1, self.buff, self.rIndex)[0])
-				struct.pack_into("%ds"%(n - lenSeg1), retBuffer, lenSeg1, struct.unpack_from("%ds"%(n-lenSeg1), self.buff, 0)[0])
+				struct.pack_into("%ds"%(rResrvLen - lenSeg1), retBuffer, lenSeg1, struct.unpack_from("%ds"%(rResrvLen-lenSeg1), self.buff, 0)[0])
 				return retBuffer.tostring()
 		else:
 			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.readn_reserve")
 
-	def read_confirm(self, n):
-		if self.rIndex + n >= self.reIndex:
+	def read_confirm(self, cnfmLen):
+		"""
+		self.reIndex can be trusted only once, writeThread may change it.
+		"""
+		wrapedIndex = self.rIndex + cnfmLen - self.reIndex
+		if wrapedIndex >= 0:
 			if self.usingBufferB:
-				self._cancelBufferB(self.rIndex + n -self.reIndex)
+				self._cancelBufferB(wrapedIndex)
 			else:
-				self.rIndex = self.rIndex + n
-				if self.rIndex > self.reIndex:
+				self.rIndex = self.rIndex + cnfmLen
+				if wrapedIndex - cnfmLen > 0:
 					raise socket.error(errno.ENOBUFS, "impossible, please check!", "BipBuffer.readn_reserve")
 		else:
-			self.rIndex = self.rIndex + n
+			self.rIndex = self.rIndex + cnfmLen
 
 	def read(self):
-		(res, n) = self.read_reserve()
-		self.read_confirm(n)
-		return  (res, n)
+		(res, readedLen) = self.read_reserve()
+		self.read_confirm(readedLen)
+		return  (res, readedLen)
 		
 	def read_reserve(self):
 		if self.usingBufferB and self.rIndex == self.reIndex:
-			self._cancelBufferB()
+			self._cancelBufferB(0)
 		n = self.dataLen()
 		if n > 0:
 			return (self.readn_reserve(n), n)
@@ -124,8 +128,7 @@ class BipBuffer:
 				"buffer readendIndex:%d\n"\
 				"buffer writeIndex  :%d\n"\
 				"buffer usingBufferB:%d\n"\
-				"buffer:\n%s\n"\
-				%(self.cap, self.rIndex, self.reIndex, self.wIndex, self.usingBufferB, self.buff)
+				%(self.cap, self.rIndex, self.reIndex, self.wIndex, self.usingBufferB)
 
 if __name__ == '__main__':
 	def test_normal():
@@ -199,7 +202,7 @@ if __name__ == '__main__':
 			ch = str(i%10)
 			try:
 				if (ch * (i%countPerAction + 1)) != buffer.readn((i%countPerAction + 1)):
-					print "test_wrap failed! data are not consistent!"
+					print "data are not consistent!"
 					buffer.dump()
 					raise
 			except socket.error, e:
@@ -210,6 +213,7 @@ if __name__ == '__main__':
 				else:
 					print 'test failed, unknow error\n', e
 					raise
+					return
 			i = i + 1
 			
 		th.join()
@@ -248,7 +252,9 @@ if __name__ == '__main__':
 		readCount = 0 
 		readTime = 0
 		hitTimes = 0
-		while readCount < bufferN*countPerAction:
+		totalTimes = 10000
+		while readCount < bufferN*countPerAction and totalTimes > 0:
+			totalTimes = totalTimes - 1
 			try:
 				(data, n) = buffer.read()
 				readCount = readCount + n 
@@ -267,7 +273,7 @@ if __name__ == '__main__':
 					raise
 		th.join()
 		print "read done. read times:%d, hit times:%d, readCount:%d, average readed:%d" % (readTime, hitTimes, readCount, readCount/hitTimes)
-		if buffer.dataLen() > 0:
+		if buffer.dataLen() > 0 :
 			print "test_count error, remain buffer len:%d" % buffer.dataLen()
 			buffer.dump()
 			raise
