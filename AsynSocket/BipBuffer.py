@@ -3,6 +3,7 @@ import socket
 import errno
 import array
 import struct
+import pdb
 
 class BipBuffer:
 	"""
@@ -22,6 +23,11 @@ class BipBuffer:
 
 		self.usingBufferB = False
 
+		self.totalWrite = 0
+		self.totalRead = 0
+		self.switchLock = threading.RLock()
+		self.bufferSwitch = 0
+
 	def write(self, theBuff, wLen):
 		self.write_reserve(theBuff, wLen)
 		self.write_confirm(wLen)
@@ -34,6 +40,11 @@ class BipBuffer:
 
 
 	def write_confirm(self, n):
+		self.totalWrite = self.totalWrite + n
+
+		if (self.totalWrite > self.totalRead + self.cap):
+			pdb.set_trace()
+
 		self.wIndex = self.wIndex + n
 		if not self.usingBufferB:
 			self.reIndex = self.wIndex
@@ -90,6 +101,8 @@ class BipBuffer:
 		"""
 		self.reIndex can be trusted only once, writeThread may change it.
 		"""
+		self.totalRead = self.totalRead + cnfmLen
+
 		wrapedIndex = self.rIndex + cnfmLen - self.reIndex
 		if wrapedIndex >= 0:
 			if self.usingBufferB:
@@ -97,14 +110,19 @@ class BipBuffer:
 			else:
 				self.rIndex = self.rIndex + cnfmLen
 				if wrapedIndex - cnfmLen > 0:
-					raise socket.error(errno.ENOBUFS, "impossible, please check!", "BipBuffer.readn_reserve")
+					buffer.dump()
+					raise "[BipBuffer.read_confirm]impossible, please check!"
 		else:
 			self.rIndex = self.rIndex + cnfmLen
 
 	def read(self):
-		(res, readedLen) = self.read_reserve()
-		self.read_confirm(readedLen)
-		return  (res, readedLen)
+		try:
+			(res, readedLen) = self.read_reserve()
+			if readedLen > 0:
+				self.read_confirm(readedLen)
+			return  (res, readedLen)
+		except:
+			return ('', 0)
 		
 	def read_reserve(self):
 		if self.usingBufferB and self.rIndex == self.reIndex:
@@ -171,12 +189,12 @@ if __name__ == '__main__':
 		print "test ok"
 
 
-	def test_correct():
+	def test_correct(theCountPerAction = 5):
 		print '-'*20, 'test_correct', '-'*20
 		import time
 		buffer = BipBuffer(32)
 		bufferN = 1024
-		countPerAction = 5 
+		countPerAction = theCountPerAction%32 
 		def writeBuffer():
 			i = 0
 			while i < bufferN:
@@ -220,12 +238,12 @@ if __name__ == '__main__':
 		buffer.dump()
 		print "test ok"
 
-	def test_count():
+	def test_count(theCountPerAction = 5):
 		print '-'*20, 'test_count', '-'*20
 		import time
 		buffer = BipBuffer(32)
 		bufferN = 1024 
-		countPerAction = 5 
+		countPerAction = theCountPerAction%32 
 		def writeBuffer2():
 			i = 0
 			writeCount = 0
@@ -243,6 +261,8 @@ if __name__ == '__main__':
 					else:
 						print 'test failed, unknow error\n', e
 						raise
+				#finally:
+				#	print "-->TotalWrite:%d, TotalRead:%d, ri:%d, re:%d, wi:%d, ba:%d, dl:%d" % (buffer.totalWrite, buffer.totalRead, buffer.rIndex, buffer.reIndex, buffer.wIndex, buffer.usingBufferB, buffer.dataLen())
 				i = i + 1
 			print "write done. write times:%d, write count:%d" % (bufferN, writeCount)
 
@@ -252,8 +272,9 @@ if __name__ == '__main__':
 		readCount = 0 
 		readTime = 0
 		hitTimes = 0
-		totalTimes = 10000
-		while readCount < bufferN*countPerAction and totalTimes > 0:
+		totalTimes = 20000
+		while readCount < bufferN*countPerAction:
+		#while readCount < bufferN*countPerAction and totalTimes > 0:
 			totalTimes = totalTimes - 1
 			try:
 				(data, n) = buffer.read()
@@ -264,16 +285,23 @@ if __name__ == '__main__':
 				#print "read len:%d, read:%s" % (n, data)
 			except socket.error, e :
 				if e.errno == errno.ENOBUFS:
-					#print "no data to read. readed:%d\n"% readCount
+					print "no data to read. readed:%d\n"% readCount
 					#buffer.dump()
 					#time.sleep(1)
 					continue
 				else:
 					print 'test failed, unknow error\n', e
 					raise
+			#finally:
+			#	print "<--TotalWrite:%d, TotalRead:%d, ri:%d, re:%d, wi:%d, ba:%d, readed:%d" % (buffer.totalWrite, buffer.totalRead, buffer.rIndex, buffer.reIndex, buffer.wIndex, buffer.usingBufferB, n)
+
 		th.join()
 		print "read done. read times:%d, hit times:%d, readCount:%d, average readed:%d" % (readTime, hitTimes, readCount, readCount/hitTimes)
-		if buffer.dataLen() > 0 :
+		if buffer.totalWrite != buffer.totalRead:
+			print "test_count error, TotalWrite:%d, TotalRead:%d, diff:%d" % (buffer.totalWrite, buffer.totalRead, buffer.totalWrite - buffer.totalRead)
+			buffer.dump()
+			raise
+		if buffer.dataLen() > 0 or buffer.totalWrite != buffer.totalRead:
 			print "test_count error, remain buffer len:%d" % buffer.dataLen()
 			buffer.dump()
 			raise
@@ -283,8 +311,9 @@ if __name__ == '__main__':
 	try:
 		test_normal()
 		test_wrap()
-		test_correct()
-		test_count()
+		for i in range(0, 100):
+			test_correct(5 + i%10)
+			test_count( 5 + i%10)
 		print '-'*20, 'all_done', '-'*20
 	except Exception, e:
 		print "test failed:"
