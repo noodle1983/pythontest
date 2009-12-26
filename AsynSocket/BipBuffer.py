@@ -72,8 +72,8 @@ class BipBuffer:
 		return res
 
 	def readn_reserve(self, n):
-		if self.usingBufferB and self.rIndex >= self.reIndex:
-			self._cancelBufferB(self.rIndex -self.reIndex)
+		if self.usingBufferB and self.rIndex == self.reIndex:
+			self._cancelBufferB()
 		if self.dataLen() >= n:
 			if self.reIndex - self.rIndex >= n:
 				return struct.unpack_from("%ds"%n, self.buff, self.rIndex)[0]
@@ -87,9 +87,15 @@ class BipBuffer:
 			raise socket.error(errno.ENOBUFS, "Buffer has not enough data to read", "BipBuffer.readn_reserve")
 
 	def read_confirm(self, n):
-		self.rIndex = self.rIndex + n
-		if self.usingBufferB and self.rIndex >= self.reIndex:
-			self._cancelBufferB(self.rIndex -self.reIndex)
+		if self.rIndex + n >= self.reIndex:
+			if self.usingBufferB:
+				self._cancelBufferB(self.rIndex + n -self.reIndex)
+			else:
+				self.rIndex = self.rIndex + n
+				if self.rIndex > self.reIndex:
+					raise socket.error(errno.ENOBUFS, "impossible, please check!", "BipBuffer.readn_reserve")
+		else:
+			self.rIndex = self.rIndex + n
 
 	def read(self):
 		(res, n) = self.read_reserve()
@@ -97,8 +103,8 @@ class BipBuffer:
 		return  (res, n)
 		
 	def read_reserve(self):
-		if self.usingBufferB and self.rIndex >= self.reIndex:
-			self._cancelBufferB(self.rIndex -self.reIndex)
+		if self.usingBufferB and self.rIndex == self.reIndex:
+			self._cancelBufferB()
 		n = self.dataLen()
 		if n > 0:
 			return (self.readn_reserve(n), n)
