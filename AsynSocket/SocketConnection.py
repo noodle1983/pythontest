@@ -28,6 +28,7 @@ class SocketConnection:
 		self.status = theSocket.status
 
 		self.proto = theProtocol
+		self.proto.addConnection(self)
 		self.processor = theProcessor
 
 	def reportError(self, strError = ""): 
@@ -67,6 +68,12 @@ class SocketConnection:
 			self.sock.sendImpl()
 		except socket.error, e:
 			self.reportError("[SocketConnection.sendImpl]send error!") 
+
+	def recv(self):
+		try:
+			self.sock.sendImpl()
+		except socket.error, e:
+			self.reportError("[SocketConnection.recv]send error!") 
 	
 	def recvImpl(self):
 		"SocketConnection.recvImpl"

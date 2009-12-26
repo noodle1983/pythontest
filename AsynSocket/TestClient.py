@@ -11,9 +11,12 @@ class Protocol:
 	def _init__(self):
 		pass
 
+	def addConnection(self, theConnection):
+		self.connection = theConnection
+
 	def handleInput(self): 
 		"Protocol.handleInput"
-		pass
+		print "[Protocol.handleInput]", self.connection.recv()
 
 	def handleConnected(self):
 		"Protocol.handleConnected"
