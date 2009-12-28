@@ -28,6 +28,9 @@ class BipBuffer:
 		self.switchLock = threading.RLock()
 		self.bufferSwitch = 0
 
+		self.rDebugInfo = {} 
+		self.wDebugInfo = {} 
+
 	def write(self, theBuff, wLen):
 		self.write_reserve(theBuff, wLen)
 		self.write_confirm(wLen)
@@ -83,6 +86,9 @@ class BipBuffer:
 		return res
 
 	def readn_reserve(self, rResrvLen):
+		"""
+		!!!check if need to cancelBufferB first
+		"""
 		if self.usingBufferB and self.rIndex == self.reIndex:
 			self._cancelBufferB(0)
 		if self.dataLen() >= rResrvLen:
@@ -99,12 +105,13 @@ class BipBuffer:
 
 	def read_confirm(self, cnfmLen):
 		"""
-		self.reIndex can be trusted only once, writeThread may change it.
+		!!!self.reIndex can be trusted only once, writeThread may change it.
+		!!!must not cancelBufferB when wrapedIndex
 		"""
 		self.totalRead = self.totalRead + cnfmLen
 
 		wrapedIndex = self.rIndex + cnfmLen - self.reIndex
-		if wrapedIndex >= 0:
+		if wrapedIndex > 0:
 			if self.usingBufferB:
 				self._cancelBufferB(wrapedIndex)
 			else:
@@ -125,6 +132,9 @@ class BipBuffer:
 			return ('', 0)
 		
 	def read_reserve(self):
+		"""
+		!!!check if need to cancelBufferB first
+		"""
 		if self.usingBufferB and self.rIndex == self.reIndex:
 			self._cancelBufferB(0)
 		n = self.dataLen()
@@ -146,7 +156,12 @@ class BipBuffer:
 				"buffer readendIndex:%d\n"\
 				"buffer writeIndex  :%d\n"\
 				"buffer usingBufferB:%d\n"\
-				%(self.cap, self.rIndex, self.reIndex, self.wIndex, self.usingBufferB)
+				"buffer totalWrite  :%d\n"\
+				"buffer totalRead   :%d\n"\
+				%(self.cap, self.rIndex, self.reIndex, self.wIndex, self.usingBufferB, self.totalWrite, self.totalRead)
+
+		if self.cap <= 100:
+			print "buffer cap         :%s\n" % str(self.buff)
 
 if __name__ == '__main__':
 	def test_normal():
@@ -190,7 +205,7 @@ if __name__ == '__main__':
 
 
 	def test_correct(theCountPerAction = 5):
-		print '-'*20, 'test_correct', '-'*20
+		print '-'*20, 'test_correct(', theCountPerAction, ')', '-'*20
 		import time
 		buffer = BipBuffer(32)
 		bufferN = 1024
@@ -200,7 +215,10 @@ if __name__ == '__main__':
 			while i < bufferN:
 				ch = str(i%10)
 				try:
+					buffer.wDebugInfo[i%20] = "[i:%d, wIndex:%d, rIndex:%d, reIndex:%d, ba:%d, data:%s]" % \
+						(i, buffer.wIndex, buffer.rIndex, buffer.reIndex, buffer.usingBufferB, ch * (i%countPerAction + 1))
 					buffer.write(ch * (i%countPerAction + 1), (i%countPerAction + 1))
+
 				except socket.error, e:
 					if e.errno == errno.ENOBUFS:
 						#print "not enough buffer %d\n"% i
@@ -219,10 +237,13 @@ if __name__ == '__main__':
 		while i < bufferN:
 			ch = str(i%10)
 			try:
-				if (ch * (i%countPerAction + 1)) != buffer.readn((i%countPerAction + 1)):
-					print "data are not consistent!"
+				buffer.rDebugInfo[i%20] = "[i:%d, wIndex:%d, rIndex:%d, reIndex:%d, ba:%d]" % (i, buffer.wIndex, buffer.rIndex, buffer.reIndex, buffer.usingBufferB)
+				expected = ch * (i%countPerAction + 1)
+				readed = buffer.readn((i%countPerAction + 1))
+				if expected != readed:
+					print "data are not consistent![i:%d][readed:%s][expected:%s]" % (i,readed, expected)
 					buffer.dump()
-					raise
+					pdb.set_trace()
 			except socket.error, e:
 				if e.errno == errno.ENOBUFS:
 					#print "no data to read %d\n"% i
@@ -235,11 +256,10 @@ if __name__ == '__main__':
 			i = i + 1
 			
 		th.join()
-		buffer.dump()
 		print "test ok"
 
 	def test_count(theCountPerAction = 5):
-		print '-'*20, 'test_count', '-'*20
+		print '-'*20, 'test_count(', theCountPerAction, ')', '-'*20
 		import time
 		buffer = BipBuffer(32)
 		bufferN = 1024 
