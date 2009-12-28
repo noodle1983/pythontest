@@ -293,6 +293,8 @@ if __name__ == '__main__':
 		readTime = 0
 		hitTimes = 0
 		totalTimes = 20000
+		readTimeAfterWriteDone = 100
+		readTimeWhenWriteDone = 0
 		while readCount < bufferN*countPerAction:
 		#while readCount < bufferN*countPerAction and totalTimes > 0:
 			totalTimes = totalTimes - 1
@@ -303,6 +305,12 @@ if __name__ == '__main__':
 				if n:
 					hitTimes = hitTimes + 1
 				#print "read len:%d, read:%s" % (n, data)
+				if buffer.totalWrite == bufferN*countPerAction:
+					if readTimeWhenWriteDone == 0:
+						readTimeWhenWriteDone = readTime 
+					elif readTimeWhenWriteDone + readTimeAfterWriteDone < readTime:
+						print 'can not stop reading'
+						pdb.set_trace()
 			except socket.error, e :
 				if e.errno == errno.ENOBUFS:
 					print "no data to read. readed:%d\n"% readCount
