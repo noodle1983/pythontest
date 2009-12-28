@@ -43,14 +43,12 @@ class BipBuffer:
 
 
 	def write_confirm(self, n):
-		self.totalWrite = self.totalWrite + n
-
-		if (self.totalWrite > self.totalRead + self.cap):
-			pdb.set_trace()
-
 		self.wIndex = self.wIndex + n
-		if not self.usingBufferB:
-			self.reIndex = self.wIndex
+		with self.switchLock:
+			if not self.usingBufferB:
+				self.reIndex = self.wIndex
+
+		self.totalWrite = self.totalWrite + n
 
 	def _writeBufferA(self, theBuff, n):
 		#enough space
@@ -79,8 +77,9 @@ class BipBuffer:
 		self.rIndex = newRIndex 
 		#bug report: reIndex = self.wIndex may be not newest.
 		#write action with update it; if no write action, it make some buffer unread
-		self.reIndex = self.wIndex 
-		self.usingBufferB = False
+		with self.switchLock:
+			self.reIndex = self.wIndex 
+			self.usingBufferB = False
 
 	def readn(self, n):
 		res = self.readn_reserve(n)
@@ -110,8 +109,6 @@ class BipBuffer:
 		!!!self.reIndex can be trusted only once, writeThread may change it.
 		!!!must not cancelBufferB when wrapedIndex
 		"""
-		self.totalRead = self.totalRead + cnfmLen
-
 		wrapedIndex = self.rIndex + cnfmLen - self.reIndex
 		if wrapedIndex > 0:
 			if self.usingBufferB:
@@ -123,6 +120,8 @@ class BipBuffer:
 					raise "[BipBuffer.read_confirm]impossible, please check!"
 		else:
 			self.rIndex = self.rIndex + cnfmLen
+
+		self.totalRead = self.totalRead + cnfmLen
 
 	def read(self):
 		try:
@@ -341,7 +340,7 @@ if __name__ == '__main__':
 	try:
 		test_normal()
 		test_wrap()
-		for i in range(0, 100):
+		for i in range(0, 10000):
 			test_correct(5 + i%10)
 			test_count( 5 + i%10)
 		print '-'*20, 'all_done', '-'*20
