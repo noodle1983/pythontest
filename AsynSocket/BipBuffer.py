@@ -20,6 +20,7 @@ class BipBuffer:
 		self.rIndex = 0
 		self.reIndex = 0
 		self.wIndex = 0
+		self.maxRead = self.cap
 
 		self.usingBufferB = False
 
@@ -30,6 +31,11 @@ class BipBuffer:
 
 		self.rDebugInfo = {} 
 		self.wDebugInfo = {} 
+
+	def setMaxRead(self, theMaxRead):
+		if theMaxRead > self.cap or theMaxRead <= 0:
+			return
+		self.maxRead = theMaxRead
 
 	def write(self, theBuff, wLen):
 		self.write_reserve(theBuff, wLen)
@@ -139,6 +145,8 @@ class BipBuffer:
 		if self.usingBufferB and self.rIndex == self.reIndex:
 			self._cancelBufferB(0)
 		n = self.dataLen()
+		if n > self.maxRead:
+			n = self.maxRead
 		if n > 0:
 			return (self.readn_reserve(n), n)
 		else:
