@@ -77,7 +77,9 @@ class BipBuffer:
 
 	def _cancelBufferB(self, newRIndex = 0):
 		self.rIndex = newRIndex 
-		self.reIndex = self.wIndex
+		#bug report: reIndex = self.wIndex may be not newest.
+		#write action with update it; if no write action, it make some buffer unread
+		self.reIndex = self.wIndex 
 		self.usingBufferB = False
 
 	def readn(self, n):
