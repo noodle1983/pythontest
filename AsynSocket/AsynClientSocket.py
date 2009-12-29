@@ -136,7 +136,10 @@ class AsynClientSocket:
 				sendedLen = self.sock.send(package)
 				self.sendBuffer.read_confirm(sendedLen)
 		except socket.error, e:
-			self.reportError("[AsynClientSocket.sendImpl]sending error!\n" + str(e))
+			if e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK):
+				return
+			print "[AsynClientSocket.sendImpl]sending error!" + str(e)
+			raise e
 			return
 		finally:
 			self.status.rmStatus(CONST.STATUS_WF|CONST.STATUS_D)	
@@ -158,13 +161,14 @@ class AsynClientSocket:
 				self.status.rmStatus(CONST.STATUS_RF)	
 			recvLen = len(buf)
 			if recvLen <= 0:
-				self.reportError("[AsynClientSocket.recvImpl]recv None buffer")
-				return
+				raise socket.error(errno.ENOBUFS, "AsynClientSocket.recvImpl", "Buffer has not enough space to write")
 			self.recvBuffer.write(buf, recvLen)
 		except socket.error, e:
 			if e.errno == errno.ENOBUFS:
 				self.recvBackupPackage = buf 
 				self.status.addStatus(CONST.STATUS_RF)	
+			elif e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK):
+				return
 			else:
 				raise e
 			return
