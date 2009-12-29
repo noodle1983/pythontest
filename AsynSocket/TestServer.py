@@ -24,7 +24,7 @@ class Protocol:
 	def handleConnected(self, con):
 		"Protocol.handleConnected"
 		print "[Protocol.handleConnected]"
-		msg = "Connected Echo Server. Your addr:%s" + str(con.addr)
+		msg = "Connected Echo Server. Your addr:%s\n" + str(con.addr)
 		con.send(msg, len(msg))
 
 	def handleError(self, con, str):
