@@ -101,9 +101,14 @@ class AsynClientSocket:
 		return False
 
 	def close(self):
-		self.sock.close()
-		self.status.addStatus(CONST.STATUS_E|CONST.STATUS_UD)
-		self.status.rmStatus(CONST.STATUS_C)
+		try:
+			self.sock.close()
+		except Exception, e:
+			print "[AsynClientSocket.close]", e	
+		finally:
+			self.status.addStatus(CONST.STATUS_E|CONST.STATUS_UD)
+			self.status.rmStatus(CONST.STATUS_C)
+
 
 	def reportError(self, strerror):
 		"AsynClientSocket::reportError"

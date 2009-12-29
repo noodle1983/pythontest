@@ -60,7 +60,7 @@ class SocketConnection:
 			self.sock.close()
 			self.proto.handleClose(self)
 		except socket.error, e:
-			self.reportError("[SocketConnection.close]close error:\n" + str(e))
+			self.reportError("[SocketConnection.close]close error:" + str(e))
 
 	def send(self, package, len):
 		if not self.status.has(CONST.STATUS_C):
@@ -100,14 +100,14 @@ class SocketConnection:
 		#print "[SocketConnection.genJobs]", self.sock.dump()
 		if not self.sock.status.has(CONST.STATUS_C):
 			if self.sock.connector.hasError(self.status.get()):
-				self.reportError("[SocketConnection.genJobs]connecting error!\n")
+				self.reportError("[SocketConnection.genJobs]connecting error!")
 				return
 			if self.sock.connector.isConnected(self.status.get()):
 				self.status.addStatus(CONST.STATUS_C)
 				self.handleConnected()
 
 		if self.sock.status.has(CONST.STATUS_EF):
-			self.reportError("[SocketConnection.genJobs]socket error!\n")
+			self.reportError("[SocketConnection.genJobs]socket error!")
 
 		if self.sock.status.has(CONST.STATUS_UD | CONST.STATUS_E): 
 			return
