@@ -3,6 +3,7 @@ from BipBuffer import BipBuffer
 import threading
 import socket
 import errno
+from Bind import Bind1
 
 import SocketStatus
 import CONST
@@ -27,18 +28,22 @@ class SocketConnection:
 		self.sock.setBuffer(self.recvBuffer, self.sendBuffer)
 		self.fd = theSocket.getFileNo()
 		self.status = theSocket.status
+		self.addr = ('', 0)
 
 		self.proto = theProtocol
-		self.proto.addConnection(self)
+		#self.proto.addConnection(self)
 		self.processor = theProcessor
+		self.protoHandleConnected = Bind1(self.proto.handleConnected, self)
+		self.protoHandleInput = Bind1(self.proto.handleInput, self)
 
 	def reportError(self, strError = ""): 
 		self.sock.reportError(strError)
-		self.proto.handleError(strError)
+		self.proto.handleError(self, strError)
 
-	def connect(self, addr, port):
+	def connect(self, host, port):
 		try:
-			self.sock.connect(addr, port)
+			self.sock.connect(host, port)
+			self.addr = (host, port)
 			if self.sock.status.has(CONST.STATUS_C):
 				self.handleConnected()
 		except socket.error, e:
@@ -48,12 +53,12 @@ class SocketConnection:
 		self.sock.handleConnected()
 		self.sendBuffer.reset()
 		self.recvBuffer.reset()
-		self.processor.process(self.fd, self.proto.handleConnected)
+		self.processor.process(self.fd, self.protoHandleConnected)
 
 	def close(self):
 		try:
 			self.sock.close()
-			self.proto.close()
+			self.proto.handleClose(self)
 		except socket.error, e:
 			self.reportError("[SocketConnection.close]close error:\n" + str(e))
 
@@ -80,7 +85,7 @@ class SocketConnection:
 		"SocketConnection.recvImpl"
 		try:
 			self.sock.recvImpl()
-			self.processor.process(self.fd + 3, self.proto.handleInput)
+			self.processor.process(self.fd + 3, self.protoHandleInput)
 		except socket.error, e:
 			self.reportError("[SocketConnection.recvImpl]recv error!") 
 
@@ -92,7 +97,7 @@ class SocketConnection:
 			return 0
 	
 	def genJobs(self):
-		print "[SocketConnection.genJobs]", self.sock.dump()
+		#print "[SocketConnection.genJobs]", self.sock.dump()
 		if not self.sock.status.has(CONST.STATUS_C):
 			if self.sock.connector.hasError(self.status.get()):
 				self.reportError("[SocketConnection.genJobs]connecting error!\n")

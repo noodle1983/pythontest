@@ -44,6 +44,7 @@ class ConnectionManager:
 		self.thread.join()
 		for con in self.connections.values():
 			con.close()
+		self.clean()
 
 	def svc(self):
 		while self.running:
@@ -52,7 +53,7 @@ class ConnectionManager:
 					self.genJobs()
 				else:
 					self.clean()
-					time.sleep(0.1)
+					time.sleep(0.001)
 			except Exception, e:
 				print e
 				self.clean()
@@ -62,10 +63,10 @@ class ConnectionManager:
 		(rCandidate, wCandidate, eCandidate) = self.getSelectFds()
 		if not rCandidate and not wCandidate and not eCandidate:
 			return False
-		print "[ConnectionManager.select]Candidate:", rCandidate, wCandidate, eCandidate 
+		#print "[ConnectionManager.select]Candidate:", rCandidate, wCandidate, eCandidate 
 		(rReadys, wReadys, eReadys) = select.select(rCandidate, wCandidate, eCandidate, 1)
 
-		print "[ConnectionManager.select]Ready:", rReadys, wReadys, eReadys 
+		#print "[ConnectionManager.select]Ready:", rReadys, wReadys, eReadys 
 		for fd in rReadys:
 			self.connections[fd].status.addStatus(CONST.STATUS_RF)
 		for fd in wReadys:

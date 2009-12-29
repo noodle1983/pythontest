@@ -18,7 +18,6 @@ nmap <F11> :TrinityToggleNERDTree
 nmap <F10> :TrinityToggleTagList 
 nmap <F9> :TrinityToggleSourceExplorer 
 nmap <F8> :TrinityToggleAll 
-map <F2> :WMToggle
 nnoremap <silent> <Plug>NetrwBrowseX :call netrw#NetrwBrowseX(expand("<cWORD>"),0)
 nmap <Nul><Nul>d :vert scs find d =expand("<cword>")
 nmap <Nul><Nul>i :vert scs find i ^=expand("<cfile>")$	
@@ -36,10 +35,12 @@ nmap <Nul>t :scs find t =expand("<cword>")
 nmap <Nul>c :scs find c =expand("<cword>")	
 nmap <Nul>g :scs find g =expand("<cword>")	
 nmap <Nul>s :scs find s =expand("<cword>")	
+map <F2> :WMToggle
 let &cpo=s:cpo_save
 unlet s:cpo_save
 set autoindent
 set background=dark
+set cindent
 set cscopetag
 set cscopeverbose
 set noequalalways
@@ -48,7 +49,10 @@ set helplang=en
 set hlsearch
 set nomodeline
 set ruler
+set selection=exclusive
+set selectmode=mouse,key
 set shiftwidth=4
+set showmatch
 set smartindent
 set tabstop=4
 set tags=/usr/bin/ctags
@@ -61,15 +65,16 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +27 AsynSocket/BipBuffer.py
-badd +30 AsynSocket/ConnectionManager.py
-badd +92 AsynSocket/SocketConnection.py
+badd +315 AsynSocket/BipBuffer.py
+badd +56 AsynSocket/ConnectionManager.py
+badd +62 AsynSocket/SocketConnection.py
 badd +94 AsynSocket/TestConnectionManager.py
-badd +82 AsynSocket/AsynClientSocket.py
-badd +56 AsynSocket/TestClient.py
-badd +16 AsynSocket/Selector.py
+badd +153 AsynSocket/AsynClientSocket.py
+badd +129 AsynSocket/TestClient.py
+badd +88 AsynSocket/TcpServer.py
+badd +49 AsynSocket/TestServer.py
 silent! argdel *
-edit AsynSocket/BipBuffer.py
+edit AsynSocket/SocketConnection.py
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -79,8 +84,8 @@ set nosplitbelow
 set nosplitright
 wincmd t
 set winheight=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 20) / 41)
-exe '2resize ' . ((&lines * 37 + 20) / 41)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 argglobal
 enew
 file -TabBar-
@@ -96,7 +101,7 @@ setlocal nobinary
 setlocal bufhidden=delete
 setlocal nobuflisted
 setlocal buftype=nofile
-setlocal nocindent
+setlocal cindent
 setlocal cinkeys=0{,0},0),:,0#,!^F,o,O,e
 setlocal cinoptions=
 setlocal cinwords=if,else,while,do,for,switch
@@ -189,7 +194,7 @@ setlocal nobinary
 setlocal bufhidden=
 setlocal buflisted
 setlocal buftype=
-setlocal nocindent
+setlocal cindent
 setlocal cinkeys=0{,0},0),:,!^F,o,O,e
 setlocal cinoptions=
 setlocal cinwords=if,else,while,do,for,switch
@@ -275,122 +280,34 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-9
+12
 normal zo
-14
+17
 normal zo
-20
-normal zo
-43
+44
 normal zo
 45
 normal zo
-46
-normal zo
 45
 normal zo
-72
-normal zo
-76
+44
 normal zo
 101
 normal zo
-108
-normal zo
-111
-normal zo
-113
-normal zo
-111
-normal zo
-108
-normal zo
 101
 normal zo
-119
+12
 normal zo
-120
-normal zo
-122
-normal zo
-120
-normal zo
-125
-normal zo
-119
-normal zo
-137
-normal zo
-138
-normal zo
-140
-normal zo
-137
-normal zo
-9
-normal zo
-152
-normal zo
-193
-normal zo
-193
-normal zo
-242
-normal zo
-248
-normal zo
-251
-normal zo
-256
-normal zo
-256
-normal zo
-251
-normal zo
-248
-normal zo
-278
-normal zo
-280
-normal zo
-284
-normal zo
-280
-normal zo
-287
-normal zo
-288
-normal zo
-293
-normal zo
-287
-normal zo
-278
-normal zo
-301
-normal zo
-305
-normal zo
-242
-normal zo
-312
-normal zo
-315
-normal zo
-312
-normal zo
-152
-normal zo
-let s:l = 315 - ((27 * winheight(0) + 18) / 37)
+let s:l = 100 - ((9 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-315
-normal! 015l
+100
+normal! 02l
 wincmd w
 2wincmd w
-exe '1resize ' . ((&lines * 1 + 20) / 41)
-exe '2resize ' . ((&lines * 37 + 20) / 41)
+exe '1resize ' . ((&lines * 1 + 16) / 33)
+exe '2resize ' . ((&lines * 29 + 16) / 33)
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

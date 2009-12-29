@@ -14,26 +14,26 @@ class Protocol:
 	def addConnection(self, theConnection):
 		self.connection = theConnection
 
-	def handleInput(self): 
+	def handleInput(self, con): 
 		"Protocol.handleInput"
 		i = 6
-		(buffer, len) = self.connection.readRecvBuffer()
+		(buffer, len) = con.readRecvBuffer()
 		print "[Protocol.handleInput]buffer:", buffer
 		assert buffer == str(i)*i
 		assert len == i
-		self.connection.close()
+		con.close()
 
-	def handleConnected(self):
+	def handleConnected(self, con):
 		"Protocol.handleConnected"
 		print "[Protocol.handleConnected]"
 		i = 6
-		self.connection.send(str(i)*i, i)
+		con.send(str(i)*i, i)
 
-	def handleError(self, str):
+	def handleError(self, con, str):
 		"Protocol.handleError"
 		print "[Protocol.handleError]" , str
 
-	def close(self):
+	def handleClose(self, con):
 		"Protocol.close"
 		pass
 
