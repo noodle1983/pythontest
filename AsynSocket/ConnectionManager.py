@@ -5,6 +5,7 @@ import errno
 import CONST
 import SocketStatus
 import select
+import traceback
 
 class ConnectionManager:
 
@@ -55,7 +56,10 @@ class ConnectionManager:
 					self.clean()
 					time.sleep(0.001)
 			except Exception, e:
-				print e
+				#print "-"*20 +  'Exception' + '-'* 20
+				#print e
+				#print traceback.print_exc()
+				#print "-"*20 + '---------' + '-'* 20
 				self.clean()
 				continue
 

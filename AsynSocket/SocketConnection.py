@@ -98,6 +98,12 @@ class SocketConnection:
 	
 	def genJobs(self):
 		#print "[SocketConnection.genJobs]", self.sock.dump()
+		if self.sock.status.has(CONST.STATUS_EF):
+			self.reportError("[SocketConnection.genJobs]socket error!")
+
+		if self.sock.status.has(CONST.STATUS_UD | CONST.STATUS_E): 
+			return
+
 		if not self.sock.status.has(CONST.STATUS_C):
 			if self.sock.connector.hasError(self.status.get()):
 				self.reportError("[SocketConnection.genJobs]connecting error!")
@@ -106,11 +112,6 @@ class SocketConnection:
 				self.status.addStatus(CONST.STATUS_C)
 				self.handleConnected()
 
-		if self.sock.status.has(CONST.STATUS_EF):
-			self.reportError("[SocketConnection.genJobs]socket error!")
-
-		if self.sock.status.has(CONST.STATUS_UD | CONST.STATUS_E): 
-			return
 		if self.sock.status.has(CONST.STATUS_RF):
 			self.processor.process(self.fd + 1, self.recvImpl)
 		if self.sock.status.has(CONST.STATUS_WF) and self.sock.status.has(CONST.STATUS_D):
