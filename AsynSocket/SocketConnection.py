@@ -19,6 +19,7 @@ class SocketConnection:
 		theProcessor: thread facade
 		"""
 		self.recvBuffer = BipBuffer(1024*1024)
+		self.recvBuffer.setMaxRead(5120)
 		self.sendBuffer = BipBuffer(1024*1024)
 		self.sendLock = threading.RLock()
 
@@ -69,9 +70,9 @@ class SocketConnection:
 		except socket.error, e:
 			self.reportError("[SocketConnection.sendImpl]send error!") 
 
-	def recv(self):
+	def readRecvBuffer(self):
 		try:
-			self.sock.sendImpl()
+			return self.recvBuffer.read()
 		except socket.error, e:
 			self.reportError("[SocketConnection.recv]send error!") 
 	

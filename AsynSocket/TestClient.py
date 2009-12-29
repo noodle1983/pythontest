@@ -16,11 +16,18 @@ class Protocol:
 
 	def handleInput(self): 
 		"Protocol.handleInput"
-		print "[Protocol.handleInput]", self.connection.recv()
+		i = 6
+		(buffer, len) = self.connection.readRecvBuffer()
+		print "[Protocol.handleInput]buffer:", buffer
+		assert buffer == str(i)*i
+		assert len == i
+		self.connection.close()
 
 	def handleConnected(self):
 		"Protocol.handleConnected"
-		pass
+		print "[Protocol.handleConnected]"
+		i = 6
+		self.connection.send(str(i)*i, i)
 
 	def handleError(self, str):
 		"Protocol.handleError"
@@ -107,14 +114,9 @@ def testSend():
 	connection.connect(host, port)
 	while not connection.status.has(CONST.STATUS_C):
 		time.sleep(1)
+	while not connection.status.has(CONST.STATUS_UD):
+		time.sleep(1)
 
-	for i in range(1, 5):
-		connection.send(str(i)*i, i)
-		while connection.recvBuffer.dataLen() <= 0:
-			time.sleep(1)
-		assert connection.recvBuffer.read() == (str(i)*i, i)
-
-	newSock.status.addStatus(CONST.STATUS_UD)
 	manager.clean()
 
 	assert len(manager) == 0 

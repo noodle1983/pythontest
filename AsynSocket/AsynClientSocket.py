@@ -54,9 +54,7 @@ class AsynConnector:
 class AsynClientSocket:
 
 	def __init__(self):
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.sock.setblocking(0)
-		self.status = SocketStatus.SocketStatus()
+		self.initSock()
 
 		self.connector = AsynConnector(self.sock)
 		self.connectTimer = threading.Timer(5, self.handleConnectTimeout)
@@ -65,11 +63,19 @@ class AsynClientSocket:
 		self.recvBackupPackage = 0
 		self.sendBuffer = BipBuffer(1024*1024)
 
+	def initSock(self):
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.sock.setblocking(0)
+		self.status = SocketStatus.SocketStatus()
+
 	def setBuffer(self, theRecvBuffer, theSendBuffer):
 		self.recvBuffer = theRecvBuffer
 		self.sendBuffer = theSendBuffer
 
 	def connect(self, host,	port, timeout = 3):
+		if self.status.has(CONST.STATUS_C):
+			print "[AsynClientSocket.connect]ignore request! connected to ", self.addr
+			return
 		self.addr = (host, port)
 		self.status.set()
 		retCon = self.connector.connect(self.addr, timeout)
@@ -96,7 +102,9 @@ class AsynClientSocket:
 
 	def close(self):
 		self.sock.close()
-		
+		self.status.addStatus(CONST.STATUS_E|CONST.STATUS_UD)
+		self.status.rmStatus(CONST.STATUS_C)
+
 	def reportError(self, strerror):
 		"AsynClientSocket::reportError"
 
@@ -152,7 +160,8 @@ class AsynClientSocket:
 			if e.errno == errno.ENOBUFS:
 				self.recvBackupPackage = buf 
 				self.status.addStatus(CONST.STATUS_RF)	
-			self.reportError("[AsynClientSocket.recvImpl]recv exception:\n" + str(e))
+			else:
+				raise e
 			return
 
 	def dump(self):
