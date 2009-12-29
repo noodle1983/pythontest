@@ -24,10 +24,10 @@ class Protocol:
 		#print "[Protocol.handleInput]buffer:", buffer
 		self.recvCount += len
 		print "[Protocol.handleInput]", self.recvCount
-		if self.recvCount == self.datalen:
+		if self.recvCount >= self.datalen:
 			self.endTime = time.time()
 			print "begin:%d, end:%d, msgCount:%d, msgLen:%d, tps:%d" % \
-				(self.beginTime,self.endTime, self.msgCount, self.msgLen, self.datalen/(self.beginTime + self.endTime)) 
+				(self.beginTime,self.endTime, self.msgCount, self.msgLen, self.datalen/(self.beginTime - self.endTime)) 
 			con.close()
 
 	def handleConnected(self, con):
@@ -54,7 +54,7 @@ class Protocol:
 
 processor = Processor(4)
 manager = ConnectionManager()
-host = "192.168.10.1"
+host = "127.0.0.1"
 port = 10000
 
 def testSend():

@@ -29,6 +29,7 @@ class ConnectionManager:
 				self.connections[theFd] = theConnection
 		else:
 			orgConnection.reportError("[ConnectionManager.addConnection]file descriptor duplicated!")
+			print orgConnection.sock.dump()
 			theConnection.reportError("[ConnectionManager.addConnection]file descriptor duplicated!")
 
 	def clean(self):
@@ -67,10 +68,10 @@ class ConnectionManager:
 		(rCandidate, wCandidate, eCandidate) = self.getSelectFds()
 		if not rCandidate and not wCandidate and not eCandidate:
 			return False
-		#print "[ConnectionManager.select]Candidate:", rCandidate, wCandidate, eCandidate 
+		print "[ConnectionManager.select]Candidate:", rCandidate, wCandidate, eCandidate 
 		(rReadys, wReadys, eReadys) = select.select(rCandidate, wCandidate, eCandidate, 1)
 
-		#print "[ConnectionManager.select]Ready:", rReadys, wReadys, eReadys 
+		print "[ConnectionManager.select]Ready:", rReadys, wReadys, eReadys 
 		for fd in rReadys:
 			self.connections[fd].status.addStatus(CONST.STATUS_RF)
 		for fd in wReadys:
