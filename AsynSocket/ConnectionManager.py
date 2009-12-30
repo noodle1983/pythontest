@@ -53,9 +53,8 @@ class ConnectionManager:
 			try:
 				if self.select():
 					self.genJobs()
-				else:
-					self.clean()
-					time.sleep(0.001)
+				#else:
+					#time.sleep(0.001)
 			except Exception, e:
 				#print "-"*20 +  'Exception' + '-'* 20
 				#print e

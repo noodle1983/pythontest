@@ -20,9 +20,9 @@ class SocketConnection:
 		theProcessor: thread facade
 		"""
 		self.recvBuffer = BipBuffer(1024*1024)
-		self.recvBuffer.setMaxRead(5120)
+		self.recvBuffer.setMaxRead(4096)
 		self.sendBuffer = BipBuffer(1024*1024)
-		self.recvBuffer.setMaxRead(5120)
+		self.recvBuffer.setMaxRead(4096)
 		self.sendLock = threading.RLock()
 
 		self.sock = theSocket
@@ -73,7 +73,7 @@ class SocketConnection:
 	def sendImpl(self):
 		try:
 			self.sock.sendImpl()
-		except socket.error, e:
+		except:
 			self.reportError("[SocketConnection.sendImpl]send error!") 
 
 	def readRecvBuffer(self):
@@ -116,6 +116,6 @@ class SocketConnection:
 		if self.sock.status.has(CONST.STATUS_RF):
 			self.processor.process(self.fd + 1, self.recvImpl)
 		if self.sock.status.has(CONST.STATUS_WF) and self.sock.status.has(CONST.STATUS_D):
-			self.processor.process(self.fd + 2, self.sock.sendImpl)
+			self.processor.process(self.fd + 2, self.sendImpl)
 
 
