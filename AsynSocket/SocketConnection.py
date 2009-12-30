@@ -45,8 +45,9 @@ class SocketConnection:
 		try:
 			self.sock.connect(host, port)
 			self.addr = (host, port)
-			if self.sock.status.has(CONST.STATUS_C):
-				self.handleConnected()
+			#duplicate when genJobs
+			#if self.sock.status.has(CONST.STATUS_C):
+			#	self.handleConnected()
 		except socket.error, e:
 			self.reportError("[SocketConnection.connect]connecting error:" + str(e))
 	
@@ -86,7 +87,7 @@ class SocketConnection:
 		"SocketConnection.recvImpl"
 		try:
 			self.sock.recvImpl()
-			self.processor.process(self.fd + 3, self.protoHandleInput)
+			self.processor.process(self.fd + 1, self.protoHandleInput)
 		except socket.error, e:
 			self.reportError("[SocketConnection.recvImpl]recv error!") 
 
@@ -114,8 +115,8 @@ class SocketConnection:
 				self.handleConnected()
 
 		if self.sock.status.has(CONST.STATUS_RF):
-			self.processor.process(self.fd + 1, self.recvImpl)
+			self.processor.process(self.fd + 2, self.recvImpl)
 		if self.sock.status.has(CONST.STATUS_WF) and self.sock.status.has(CONST.STATUS_D):
-			self.processor.process(self.fd + 2, self.sendImpl)
+			self.processor.process(self.fd + 3, self.sendImpl)
 
 

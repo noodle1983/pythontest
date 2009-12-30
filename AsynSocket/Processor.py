@@ -50,8 +50,7 @@ class Thread:
 				action()	
 			except:
 				print traceback.print_exc()
-				self.status = THREAD_STATUS_ERROR
-				break
+				continue
 
 				
 

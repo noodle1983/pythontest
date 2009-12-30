@@ -10,7 +10,7 @@ import time
 class Protocol:
 	def __init__(self):
 		self.msgCount = 1000
-		self.msgLen = 20 
+		self.msgLen = 128 
 		self.datalen = self.msgCount * self.msgLen
 		self.beginTime = 0
 		self.recvCount = 0
@@ -23,7 +23,7 @@ class Protocol:
 		(buffer, len) = con.readRecvBuffer()
 		#print "[Protocol.handleInput]buffer:", buffer
 		self.recvCount += len
-		print "[Protocol.handleInput]", self.recvCount
+		#print "[Protocol.handleInput]", self.recvCount
 		if self.recvCount >= self.datalen:
 			self.endTime = time.time()
 			print "time:%d, msgCount:%d, dataLen:%d, recvLen:%d, sendLen:%d, tps:%d" % \
@@ -43,7 +43,7 @@ class Protocol:
 			except:
 				continue
 
-		endTime = time.time()
+		endTime = time.time() 
 		print "time:%d, msgCount:%d, dataLen:%d, dataWrite:%d, tps:%d" % \
 			(endTime - self.beginTime, self.msgCount, self.datalen, con.sendBuffer.totalWrite, self.msgCount/(endTime - self.beginTime)) 
 
