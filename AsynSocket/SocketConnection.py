@@ -22,6 +22,7 @@ class SocketConnection:
 		self.recvBuffer = BipBuffer(1024*1024)
 		self.recvBuffer.setMaxRead(5120)
 		self.sendBuffer = BipBuffer(1024*1024)
+		self.recvBuffer.setMaxRead(5120)
 		self.sendLock = threading.RLock()
 
 		self.sock = theSocket

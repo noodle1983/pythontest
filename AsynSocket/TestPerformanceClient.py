@@ -9,7 +9,7 @@ import time
 
 class Protocol:
 	def __init__(self):
-		self.msgCount = 10
+		self.msgCount = 1000
 		self.msgLen = 128
 		self.datalen = self.msgCount * self.msgLen
 		self.beginTime = 0
@@ -26,8 +26,8 @@ class Protocol:
 		print "[Protocol.handleInput]", self.recvCount
 		if self.recvCount >= self.datalen:
 			self.endTime = time.time()
-			print "begin:%d, end:%d, msgCount:%d, msgLen:%d, tps:%d" % \
-				(self.beginTime,self.endTime, self.msgCount, self.msgLen, self.datalen/(self.beginTime - self.endTime)) 
+			print "time:%d, msgCount:%d, msgLen:%d, dataLen:%d, recvCount:%d, tps:%d" % \
+				(self.endTime - self.beginTime, self.msgCount, self.msgLen, self.datalen, self.recvCount, self.msgCount/(self.endTime - self.beginTime)) 
 			con.close()
 
 	def handleConnected(self, con):

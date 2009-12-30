@@ -18,8 +18,9 @@ class Protocol:
 	def handleInput(self, con): 
 		"Protocol.handleInput"
 		(buffer, len) = con.readRecvBuffer()
-		print "[Protocol.handleInput]buffer:", buffer
-		con.send(buffer, len)
+		if len > 0:
+			#print "[Protocol.handleInput]buffer:", buffer
+			con.send(buffer, len)
 
 	def handleConnected(self, con):
 		"Protocol.handleConnected"

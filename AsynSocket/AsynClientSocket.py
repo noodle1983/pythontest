@@ -102,6 +102,7 @@ class AsynClientSocket:
 
 	def close(self):
 		try:
+			self.connectTimer.cancel()
 			self.sock.close()
 		except Exception, e:
 			print "[AsynClientSocket.close]", e	
@@ -114,10 +115,7 @@ class AsynClientSocket:
 		"AsynClientSocket::reportError"
 
 		print strerror
-		self.connectTimer.cancel()
-		self.status.addStatus(CONST.STATUS_E)
-		self.status.rmStatus(CONST.STATUS_EF)
-		self.sock.close()
+		self.close()
 		
 	def getFileNo(self):
 		return self.sock.fileno()
@@ -161,7 +159,7 @@ class AsynClientSocket:
 				self.status.rmStatus(CONST.STATUS_RF)	
 			recvLen = len(buf)
 			if recvLen <= 0:
-				raise socket.error(errno.ENOBUFS, "AsynClientSocket.recvImpl", "Buffer has not enough space to write")
+				raise socket.error(errno.ESHUTDOWN, "AsynClientSocket.recvImpl", "Buffer has not enough space to write")
 			self.recvBuffer.write(buf, recvLen)
 		except socket.error, e:
 			if e.errno == errno.ENOBUFS:
