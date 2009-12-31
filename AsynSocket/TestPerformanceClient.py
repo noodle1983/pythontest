@@ -6,6 +6,7 @@ import SocketStatus
 import CONST
 import traceback
 import time
+import pdb
 
 class Protocol:
 	def __init__(self):
@@ -59,6 +60,7 @@ processor = Processor(4)
 manager = ConnectionManager()
 host = "127.0.0.1"
 port = 10000
+testTimeout = 30
 
 def testSend():
 	print '=' * 60
@@ -71,10 +73,14 @@ def testSend():
 	assert len(manager) == 1
 
 	connection.connect(host, port)
-	while not connection.status.has(CONST.STATUS_C):
+
+	timeout = 0
+	while not connection.status.has(CONST.STATUS_UD) and timeout < testTimeout:
 		time.sleep(1)
-	while not connection.status.has(CONST.STATUS_UD):
-		time.sleep(1)
+		timeout += 1
+	
+	if timeout >= testTimeout:
+		pdb.set_trace()
 
 	manager.clean()
 
@@ -86,8 +92,9 @@ def testSend():
 try:
 	processor.start()
 	manager.start()
-
-	testSend()
+	
+	for i in range(0,1000):
+		testSend()
 except:
 	print "-"*20 +  'Exception' + '-'* 20
 	print traceback.print_exc()

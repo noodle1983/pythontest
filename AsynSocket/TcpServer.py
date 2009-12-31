@@ -1,5 +1,6 @@
 #/usr/local/bin/python
 import socket
+import errno
 import threading
 import SocketStatus
 import CONST
@@ -40,7 +41,8 @@ class TcpServer:
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.bind(('', self.port))
 		self.sock.listen(20000)
-		self.sock.settimeout(1)
+		self.sock.setblocking(0)
+		#self.sock.settimeout(3)
 		self.connectionMan.addConnection(self.sock.fileno(), self)
 
 	def getFd(self):
@@ -54,8 +56,7 @@ class TcpServer:
 		try:
 			sock, addr = self.sock.accept()
 			newSock = AsynClientSocket()
-			newSock.sock = sock
-			newSock.status.addStatus(CONST.STATUS_C)
+			newSock.changeToServerConnection(sock)
 
 			connection = SocketConnection(newSock, self.proto, self.processor)
 			connection.addr = addr
@@ -64,10 +65,14 @@ class TcpServer:
 			self.protoHandleConnected = Bind1(self.proto.handleConnected, self)
 			self.processor.process(connection.getFd(), Bind1(self.proto.handleConnected, connection))
 
-			self.status.rmStatus(CONST.STATUS_RF)	
 		except Exception, e:
+			if e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK):
+				return
 			self.reportError("[TcpServer.accept]" + str(e))
 			return
+		finally:
+			self.status.rmStatus(CONST.STATUS_RF)	
+
 
 	def close(self):
 		if not self.status.has(CONST.STATUS_C):

@@ -24,17 +24,23 @@ class Protocol:
 
 	def handleConnected(self, con):
 		"Protocol.handleConnected"
-		print "[Protocol.handleConnected]"
+		print "[Protocol.handleConnected]" + str(con.addr)
 		msg = "Connected Echo Server. Your addr:%s\n" + str(con.addr)
 		#con.send(msg, len(msg))
 
 	def handleError(self, con, str):
 		"Protocol.handleError"
 		print "[Protocol.handleError]" ,con.addr,  str
+		print "[Protocol.handleError]sendBuffer(r:%d, w:%d) recvBuffer(r:%d, w:%d)" %\
+				(con.sendBuffer.totalRead, con.sendBuffer.totalWrite, \
+				 con.recvBuffer.totalRead, con.recvBuffer.totalWrite)
 
 	def handleClose(self, con):
 		"Protocol.close"
 		print "[Protocol.close]", con.addr
+		print "[Protocol.close]sendBuffer(r:%d, w:%d) recvBuffer(r:%d, w:%d)" %\
+				(con.sendBuffer.totalRead, con.sendBuffer.totalWrite, \
+				 con.recvBuffer.totalRead, con.recvBuffer.totalWrite)
 
 processor = Processor(4)
 protocol = Protocol()

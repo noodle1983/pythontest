@@ -37,6 +37,10 @@ class SocketConnection:
 		self.protoHandleConnected = Bind1(self.proto.handleConnected, self)
 		self.protoHandleInput = Bind1(self.proto.handleInput, self)
 
+	def dump(self):
+		return "[sock]%s\n[sendBuffer]%s\n[recvBuffer]%s\n"%\
+				(self.sock.dump(), self.sendBuffer.dump(), self.recvBuffer.dump())
+
 	def reportError(self, strError = ""): 
 		self.sock.reportError(strError)
 		self.proto.handleError(self, strError)
@@ -52,6 +56,7 @@ class SocketConnection:
 			self.reportError("[SocketConnection.connect]connecting error:" + str(e))
 	
 	def handleConnected(self):
+		print "[SocketConnection.handleConnected]"
 		self.sock.handleConnected()
 		self.sendBuffer.reset()
 		self.recvBuffer.reset()

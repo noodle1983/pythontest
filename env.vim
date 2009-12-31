@@ -14,10 +14,10 @@ nmap <silent> \be :BufExplorer
 let s:cpo_save=&cpo
 set cpo&vim
 nmap gx <Plug>NetrwBrowseX
-nmap <F11> :TrinityToggleNERDTree 
-nmap <F10> :TrinityToggleTagList 
-nmap <F9> :TrinityToggleSourceExplorer 
 nmap <F8> :TrinityToggleAll 
+nmap <F9> :TrinityToggleSourceExplorer 
+nmap <F10> :TrinityToggleTagList 
+nmap <F11> :TrinityToggleNERDTree 
 nnoremap <silent> <Plug>NetrwBrowseX :call netrw#NetrwBrowseX(expand("<cWORD>"),0)
 nmap <Nul><Nul>d :vert scs find d =expand("<cword>")
 nmap <Nul><Nul>i :vert scs find i ^=expand("<cfile>")$	
@@ -66,15 +66,16 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 set shortmess=aoO
 badd +315 AsynSocket/BipBuffer.py
-badd +56 AsynSocket/ConnectionManager.py
-badd +62 AsynSocket/SocketConnection.py
-badd +94 AsynSocket/TestConnectionManager.py
-badd +153 AsynSocket/AsynClientSocket.py
+badd +102 AsynSocket/ConnectionManager.py
+badd +36 AsynSocket/SocketConnection.py
+badd +100 AsynSocket/AsynClientSocket.py
 badd +129 AsynSocket/TestClient.py
-badd +88 AsynSocket/TcpServer.py
-badd +49 AsynSocket/TestServer.py
+badd +63 AsynSocket/TcpServer.py
+badd +60 AsynSocket/TestPerformanceClient.py
+badd +17 AsynSocket/SocketStatus.py
+badd +41 AsynSocket/TestPerformanceServer.py
 silent! argdel *
-edit AsynSocket/SocketConnection.py
+edit AsynSocket/TcpServer.py
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -84,8 +85,8 @@ set nosplitbelow
 set nosplitright
 wincmd t
 set winheight=1 winwidth=1
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '1resize ' . ((&lines * 2 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 argglobal
 enew
 file -TabBar-
@@ -181,7 +182,7 @@ setlocal syntax=
 endif
 setlocal tabstop=4
 setlocal tags=
-setlocal textwidth=0
+setlocal textwidth=118
 setlocal thesaurus=
 setlocal nowinfixheight
 setlocal nowinfixwidth
@@ -280,34 +281,36 @@ setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
-12
+13
 normal zo
-17
+41
 normal zo
-44
+56
 normal zo
-45
+57
 normal zo
-45
+70
 normal zo
-44
+71
 normal zo
-101
+70
 normal zo
-101
+75
 normal zo
-12
+56
 normal zo
-let s:l = 100 - ((9 * winheight(0) + 14) / 29)
+13
+normal zo
+let s:l = 63 - ((13 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-100
-normal! 02l
+63
+normal! 0
 wincmd w
 2wincmd w
-exe '1resize ' . ((&lines * 1 + 16) / 33)
-exe '2resize ' . ((&lines * 29 + 16) / 33)
+exe '1resize ' . ((&lines * 2 + 16) / 33)
+exe '2resize ' . ((&lines * 28 + 16) / 33)
 tabnext 1
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf

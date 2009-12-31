@@ -167,7 +167,9 @@ class BipBuffer:
 				"buffer usingBufferB:%d\n"\
 				"buffer totalWrite  :%d\n"\
 				"buffer totalRead   :%d\n"\
-				%(self.cap, self.rIndex, self.reIndex, self.wIndex, self.usingBufferB, self.totalWrite, self.totalRead)
+				"buffer dataLen     :%d\n"\
+				%(self.cap, self.rIndex, self.reIndex, self.wIndex, self.usingBufferB\
+				, self.totalWrite, self.totalRead, self.dataLen())
 
 		if self.cap <= 100:
 			print "buffer cap         :%s\n" % str(self.buff)

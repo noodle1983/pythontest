@@ -50,6 +50,9 @@ class AsynConnector:
 		if (sockStatus & CONST.STATUS_E): 
 			print "[AsynConnector.hasError]connector error."
 			return True
+		#if not (sockStatus & CONST.STATUS_C) and (sockStatus & CONST.STATUS_RF):
+		#	print "[AsynConnector.hasError]connecting error."
+		#	return True
 
 class AsynClientSocket:
 
@@ -62,6 +65,8 @@ class AsynClientSocket:
 		self.recvBuffer = BipBuffer(1024*1024)
 		self.recvBackupPackage = 0
 		self.sendBuffer = BipBuffer(1024*1024)
+
+		self.errorWhenRecvNone = False
 
 	def initSock(self):
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -80,9 +85,14 @@ class AsynClientSocket:
 		self.status.set()
 		retCon = self.connector.connect(self.addr, timeout)
 		if retCon:
-			self.status.addStatus(CONST.STATUS_C)
+			self.status.addStatus(CONST.STATUS_WF)
 		else:
 			self.connectTimer.start()
+
+	def changeToServerConnection(self, theSock):
+		self.sock = theSock
+		self.errorWhenRecvNone = True
+		self.status.addStatus(CONST.STATUS_C)
 
 	def handleConnected(self):
 		self.connectTimer.cancel()
@@ -96,7 +106,7 @@ class AsynClientSocket:
 			if self.connector.hasError(self.status.get()):
 				self.reportError("[AsynClientSocket.checkConnectedEvent]connecting error!\n")
 		elif not (self.status.get()& CONST.STATUS_C):
-			self.status.addStatus(CONST.STATUS_C)
+			self.status.addStatus(CONST.STATUS_WF)
 			return True
 		return False
 
@@ -115,6 +125,7 @@ class AsynClientSocket:
 		"AsynClientSocket::reportError"
 
 		print strerror
+		print self.dump()
 		self.close()
 		
 	def getFileNo(self):
@@ -133,15 +144,17 @@ class AsynClientSocket:
 					break
 				sendedLen = self.sock.send(package)
 				self.sendBuffer.read_confirm(sendedLen)
+				if self.sendBuffer.dataLen() <= 0:
+					self.status.rmStatus(CONST.STATUS_D)	
 		except socket.error, e:
 			if e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK):
 				return
 			print "[AsynClientSocket.sendImpl]sending error!" + str(e)
 			raise e
-			return
+			return	
 		finally:
-			self.status.rmStatus(CONST.STATUS_WF|CONST.STATUS_D)	
-			
+			self.status.rmStatus(CONST.STATUS_WF)	
+
 	def recv(self):
 		return self.recvBuffer.read()
 
@@ -159,7 +172,17 @@ class AsynClientSocket:
 				self.status.rmStatus(CONST.STATUS_RF)	
 			recvLen = len(buf)
 			if recvLen <= 0:
-				raise socket.error(errno.ESHUTDOWN, "AsynClientSocket.recvImpl", "Buffer has not enough space to write")
+				#server connection
+				if self.errorWhenRecvNone:
+					raise socket.error(errno.ESHUTDOWN, \
+							"AsynClientSocket.recvImpl", "Buffer has not enough space to write")
+					return
+				#client connection
+				err = self.sock.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR, 0)
+				if 0 != err:
+					raise socket.error(errno.ESHUTDOWN, "AsynClientSocket.recvImpl", "Buffer has not enough space to write")
+				else:
+					return
 			self.recvBuffer.write(buf, recvLen)
 		except socket.error, e:
 			if e.errno == errno.ENOBUFS:
@@ -170,7 +193,7 @@ class AsynClientSocket:
 			else:
 				raise e
 			return
-
+	
 	def dump(self):
 		return self.status.dump()
 

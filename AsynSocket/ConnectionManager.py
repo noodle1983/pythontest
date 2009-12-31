@@ -68,7 +68,7 @@ class ConnectionManager:
 		if not rCandidate and not wCandidate and not eCandidate:
 			return False
 		#print "[ConnectionManager.select]Candidate:", rCandidate, wCandidate, eCandidate 
-		(rReadys, wReadys, eReadys) = select.select(rCandidate, wCandidate, eCandidate, 1)
+		(rReadys, wReadys, eReadys) = select.select(rCandidate, wCandidate, eCandidate, 0.001)
 
 		#print "[ConnectionManager.select]Ready:", rReadys, wReadys, eReadys 
 		for fd in rReadys:
