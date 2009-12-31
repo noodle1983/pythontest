@@ -105,3 +105,5 @@ class TcpServer:
 		self.proto.handleError(self, strError)
 		self.close()
 	
+	def hasDataToSend(self):
+		return False

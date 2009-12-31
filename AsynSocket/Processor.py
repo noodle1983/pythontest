@@ -53,6 +53,12 @@ class Thread:
 				continue
 
 				
+	def dump(self):
+		dumpStr = "Thread #%d\n" % self.threadImpl.ident
+		for action in self.actionQueue:
+			dumpStr += "\t%s\n" % action.func_name
+		return dumpStr
+
 
 class Processor:
 	
@@ -77,6 +83,13 @@ class Processor:
 	def process(self, id, action):
 		tId = id % self.nThread
 		self.threads[tId].process(action)
+
+	def dump(self):
+		dumpStr = ""
+		for thread in self.threads:
+			dumpStr += thread.dump()
+		return dumpStr
+
 
 if __name__ == '__main__':
 	def sayHello():

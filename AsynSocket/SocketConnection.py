@@ -37,9 +37,12 @@ class SocketConnection:
 		self.protoHandleConnected = Bind1(self.proto.handleConnected, self)
 		self.protoHandleInput = Bind1(self.proto.handleInput, self)
 
+	def hasDataToSend(self):
+		return self.sendBuffer.dataLen() > 0
+
 	def dump(self):
 		return "[sock]%s\n[sendBuffer]%s\n[recvBuffer]%s\n"%\
-				(self.sock.dump(), self.sendBuffer.dump(), self.recvBuffer.dump())
+				(str(self.sock.dump()), str(self.sendBuffer.dump()), str(self.recvBuffer.dump()))
 
 	def reportError(self, strError = ""): 
 		self.sock.reportError(strError)
@@ -74,7 +77,7 @@ class SocketConnection:
 			raise socket.error(errno.EBADF, "SocketConnection.send", "not connected!")	
 		with self.sendLock:
 			self.sendBuffer.write(package, len)
-		self.status.addStatus(CONST.STATUS_D)
+		#self.status.addStatus(CONST.STATUS_D)
 	
 	def sendImpl(self):
 		try:
@@ -121,7 +124,7 @@ class SocketConnection:
 
 		if self.sock.status.has(CONST.STATUS_RF):
 			self.processor.process(self.fd + 2, self.recvImpl)
-		if self.sock.status.has(CONST.STATUS_WF) and self.sock.status.has(CONST.STATUS_D):
+		if self.sock.status.has(CONST.STATUS_WF) and self.hasDataToSend():
 			self.processor.process(self.fd + 3, self.sendImpl)
 
 

@@ -38,9 +38,10 @@ class Protocol:
 	def handleClose(self, con):
 		"Protocol.close"
 		print "[Protocol.close]", con.addr
-		print "[Protocol.close]sendBuffer(r:%d, w:%d) recvBuffer(r:%d, w:%d)" %\
-				(con.sendBuffer.totalRead, con.sendBuffer.totalWrite, \
-				 con.recvBuffer.totalRead, con.recvBuffer.totalWrite)
+		if not con.errorWhenRecvNone:
+			print "[Protocol.close]sendBuffer(r:%d, w:%d) recvBuffer(r:%d, w:%d)" %\
+					(con.sendBuffer.totalRead, con.sendBuffer.totalWrite, \
+					 con.recvBuffer.totalRead, con.recvBuffer.totalWrite)
 
 processor = Processor(4)
 protocol = Protocol()

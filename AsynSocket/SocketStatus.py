@@ -10,13 +10,13 @@ CONST.STATUS_WF = 0x20 #Write Flag, socket can be writen to
 CONST.STATUS_D =  0x40 #has data to send
 CONST.STATUS_UD = 0x80 #user delete
 
-CONST.STATUS_DESC = ['Connected', 'Error', 'Unkow', 'HasErrorEvent', \
+CONST.STATUS_DESC = ['Connected', 'Error', 'Unknow', 'HasErrorEvent', \
 		'SocketHasDataToRead', 'SocketCanWrite', 'HasDataToSend', 'UserStop']
 
 CONST.STATUS_CONNECTED_MASK = CONST.STATUS_WF | CONST.STATUS_E | CONST.STATUS_UD
 CONST.STATUS_CONNECTED_CON = CONST.STATUS_WF
-CONST.STATUS_SEL_WRITE_MASK = CONST.STATUS_D | CONST.STATUS_WF | CONST.STATUS_UD | CONST.STATUS_E | CONST.STATUS_C
-CONST.STATUS_SEL_WRITE_CON  = CONST.STATUS_D | CONST.STATUS_C #or status == null
+CONST.STATUS_SEL_WRITE_MASK = CONST.STATUS_WF | CONST.STATUS_UD | CONST.STATUS_E | CONST.STATUS_C
+CONST.STATUS_SEL_WRITE_CON  = CONST.STATUS_C #or status == null
 """
 send workflow: 
 	related status: CONST.STATUS_D, CONST.STATUS_WF. initialized 0;

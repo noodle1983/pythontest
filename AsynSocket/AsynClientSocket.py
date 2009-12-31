@@ -133,7 +133,7 @@ class AsynClientSocket:
 
 	def send(self, package, len):
 		self.sendBuffer.write(package, len)
-		self.status.addStatus(CONST.STATUS_D)
+		#self.status.addStatus(CONST.STATUS_D)
 
 	def sendImpl(self):
 		"AsynClientSocket.sendImpl"
@@ -144,8 +144,8 @@ class AsynClientSocket:
 					break
 				sendedLen = self.sock.send(package)
 				self.sendBuffer.read_confirm(sendedLen)
-				if self.sendBuffer.dataLen() <= 0:
-					self.status.rmStatus(CONST.STATUS_D)	
+				#if self.sendBuffer.dataLen() <= 0:
+				#	self.status.rmStatus(CONST.STATUS_D)	
 		except socket.error, e:
 			if e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK):
 				return

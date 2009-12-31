@@ -2,6 +2,7 @@
 class Bind1:
 	def __init__(self, function, param1):
 		self.function = function
+		self.func_name = function.func_name
 		self.param1 = param1
 		self.__call__ = self.execute
 

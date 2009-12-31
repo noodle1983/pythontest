@@ -51,6 +51,7 @@ class Protocol:
 	def handleError(self, con, str):
 		"Protocol.handleError"
 		print "[Protocol.handleError]" , str
+		print con.dump()
 
 	def handleClose(self, con):
 		"Protocol.close"

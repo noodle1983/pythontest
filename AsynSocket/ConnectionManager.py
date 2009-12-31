@@ -56,10 +56,10 @@ class ConnectionManager:
 				#else:
 					#time.sleep(0.001)
 			except Exception, e:
-				#print "-"*20 +  'Exception' + '-'* 20
-				#print e
-				#print traceback.print_exc()
-				#print "-"*20 + '---------' + '-'* 20
+				print "-"*20 +  'Exception' + '-'* 20
+				print e
+				print traceback.print_exc()
+				print "-"*20 + '---------' + '-'* 20
 				self.clean()
 				continue
 
@@ -95,7 +95,8 @@ class ConnectionManager:
 					continue
 				if (sock.status.get() & CONST.STATUS_SEL_READ_MASK) == CONST.STATUS_SEL_READ_CON :
 					rCandidate.append(fd)
-				if (sock.status.get() & CONST.STATUS_SEL_WRITE_MASK) == CONST.STATUS_SEL_WRITE_CON :
+				if ((sock.status.get() & CONST.STATUS_SEL_WRITE_MASK) == CONST.STATUS_SEL_WRITE_CON )\
+						and sock.hasDataToSend():
 					wCandidate.append(fd)
 				if not sock.status.has(CONST.STATUS_UD | CONST.STATUS_E | CONST.STATUS_EF):
 					eCandidate.append(fd)
