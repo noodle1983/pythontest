@@ -122,7 +122,7 @@ class BipBuffer:
 			else:
 				self.rIndex = self.rIndex + cnfmLen
 				if wrapedIndex - cnfmLen > 0:
-					buffer.dump()
+					print buffer.dump()
 					raise "[BipBuffer.read_confirm]impossible, please check!"
 		else:
 			self.rIndex = self.rIndex + cnfmLen
@@ -159,7 +159,7 @@ class BipBuffer:
 			return self.reIndex - self.rIndex
 
 	def dump(self):
-		print "----------------buffer---------------\n"\
+		dumpStr = "----------------buffer---------------\n"\
 				"buffer capability  :%d\n"\
 				"buffer readIndex   :%d\n"\
 				"buffer readendIndex:%d\n"\
@@ -172,7 +172,9 @@ class BipBuffer:
 				, self.totalWrite, self.totalRead, self.dataLen())
 
 		if self.cap <= 100:
-			print "buffer cap         :%s\n" % str(self.buff)
+			dumpStr += "buffer cap         :%s\n" % str(self.buff)
+		
+		return dumpStr
 
 if __name__ == '__main__':
 	def test_normal():
@@ -181,7 +183,7 @@ if __name__ == '__main__':
 		buffer.write('1', 1)
 		if '1' != buffer.readn(1):
 			print "test_normal failed"
-			buffer.dump()
+			print buffer.dump()
 			raise
 		print "test ok"
 
@@ -193,24 +195,24 @@ if __name__ == '__main__':
 		buffer.write('1234567890', 10)
 		if '1234567890' != buffer.readn(10):
 			print "test_wrap failed! data are not consistent!"
-			buffer.dump()
+			print buffer.dump()
 			raise
 		buffer.write('1234567890', 10)
 
 		if True != buffer.usingBufferB:
 			print "test_wrap failed! buffer should using BufferB"
-			buffer.dump()
+			print buffer.dump()
 			raise
 
 		readed = buffer.readn(30)
 		if '123456789012345678901234567890' != readed:
 			print str(readed)
 			print "test_wrap failed! data are not consistent!"
-			buffer.dump()
+			print buffer.dump()
 			raise
 		if True == buffer.usingBufferB:
 			print "test_wrap failed! buffer should using BufferB"
-			buffer.dump()
+			print buffer.dump()
 			raise
 		print "test ok"
 
@@ -253,7 +255,7 @@ if __name__ == '__main__':
 				readed = buffer.readn((i%countPerAction + 1))
 				if expected != readed:
 					print "data are not consistent![i:%d][readed:%s][expected:%s]" % (i,readed, expected)
-					buffer.dump()
+					print buffer.dump()
 					pdb.set_trace()
 			except socket.error, e:
 				if e.errno == errno.ENOBUFS:
@@ -286,7 +288,7 @@ if __name__ == '__main__':
 				except socket.error, e:
 					if e.errno == errno.ENOBUFS:
 						#print "not enough buffer %d\n"% writeCount
-						#buffer.dump()
+						#print buffer.dump()
 						#time.sleep(1)				
 						continue
 					else:
@@ -325,7 +327,7 @@ if __name__ == '__main__':
 			except socket.error, e :
 				if e.errno == errno.ENOBUFS:
 					print "no data to read. readed:%d\n"% readCount
-					#buffer.dump()
+					#print buffer.dump()
 					#time.sleep(1)
 					continue
 				else:
@@ -338,11 +340,11 @@ if __name__ == '__main__':
 		print "read done. read times:%d, hit times:%d, readCount:%d, average readed:%d" % (readTime, hitTimes, readCount, readCount/hitTimes)
 		if buffer.totalWrite != buffer.totalRead:
 			print "test_count error, TotalWrite:%d, TotalRead:%d, diff:%d" % (buffer.totalWrite, buffer.totalRead, buffer.totalWrite - buffer.totalRead)
-			buffer.dump()
+			print buffer.dump()
 			raise
 		if buffer.dataLen() > 0 or buffer.totalWrite != buffer.totalRead:
 			print "test_count error, remain buffer len:%d" % buffer.dataLen()
-			buffer.dump()
+			print buffer.dump()
 			raise
 		print "test ok"
 

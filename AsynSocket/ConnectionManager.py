@@ -34,8 +34,17 @@ class ConnectionManager:
 
 	def clean(self):
 		with self.lock:
-			self.connections = \
-					dict([(k, v) for (k, v) in self.connections.items() if not v.status.has(CONST.STATUS_UD)])
+			newConnections = {}
+			for (fd, con) in self.connections.items():
+				if con.status.has(CONST.STATUS_UD):
+					continue
+				if fd != con.getFd():
+					con.reportError("[ConnectionManager.clean]bad discriptor")
+					continue
+				newConnections[fd] = con
+			self.connections = newConnections
+			#self.connections = \
+			#		dict([(k, v) for (k, v) in self.connections.items() if not v.status.has(CONST.STATUS_UD)])
 
 	def start(self):
 		self.running = True
@@ -54,7 +63,7 @@ class ConnectionManager:
 				if self.select():
 					self.genJobs()
 				#else:
-					#time.sleep(0.001)
+				#	time.sleep(0.001)
 			except Exception, e:
 				print "-"*20 +  'Exception' + '-'* 20
 				print e

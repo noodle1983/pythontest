@@ -38,8 +38,10 @@ class AsynConnector:
 		return True
 	
 	def isConnected(self, sockStatus):
-		return (sockStatus & CONST.STATUS_C)\
-				or ((sockStatus & CONST.STATUS_CONNECTED_MASK) == CONST.STATUS_CONNECTED_CON)
+		#return (sockStatus & CONST.STATUS_C)\
+		#		or ((sockStatus & CONST.STATUS_CONNECTED_MASK) == CONST.STATUS_CONNECTED_CON)
+		return ((sockStatus & CONST.STATUS_CONNECTED_MASK) == CONST.STATUS_CONNECTED_CON)
+
 
 	def hasError(self, sockStatus):
 		"""
@@ -84,10 +86,11 @@ class AsynClientSocket:
 		self.addr = (host, port)
 		self.status.set()
 		retCon = self.connector.connect(self.addr, timeout)
-		if retCon:
-			self.status.addStatus(CONST.STATUS_WF)
-		else:
-			self.connectTimer.start()
+		#if retCon:
+		#	self.status.addStatus(CONST.STATUS_WF)
+		#else:
+		#	self.connectTimer.start()
+		self.connectTimer.start()
 
 	def changeToServerConnection(self, theSock):
 		self.sock = theSock
@@ -175,12 +178,12 @@ class AsynClientSocket:
 				#server connection
 				if self.errorWhenRecvNone:
 					raise socket.error(errno.ESHUTDOWN, \
-							"AsynClientSocket.recvImpl", "Buffer has not enough space to write")
+							"AsynClientSocket.recvImpl", "socket close")
 					return
 				#client connection
 				err = self.sock.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR, 0)
 				if 0 != err:
-					raise socket.error(errno.ESHUTDOWN, "AsynClientSocket.recvImpl", "Buffer has not enough space to write")
+					raise socket.error(errno.ESHUTDOWN, "AsynClientSocket.recvImpl", "socket close")
 				else:
 					return
 			self.recvBuffer.write(buf, recvLen)
@@ -190,6 +193,9 @@ class AsynClientSocket:
 				self.status.addStatus(CONST.STATUS_RF)	
 			elif e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK):
 				return
+			#elif e.errno  == errno.ENOTCONN:
+			#	import pdb
+			#	pdb.set_trace()
 			else:
 				raise e
 			return
@@ -197,43 +203,43 @@ class AsynClientSocket:
 	def dump(self):
 		return self.status.dump()
 
-if __name__ == '__main__':
-	import select
-	print "-----------------test2-----------------"
-	sock = AsynClientSocket()
-	try:
-		sock.connect('150.236.80.149', 9414)
-	except socket.error, e:
-		print e
-		raw_input("test failed.")
-	
-
-	sockfds = []
-	sockfds.append(sock.getFileNo())
-	(infds, outfds, errfds) = select.select(sockfds, sockfds, sockfds, 1)
-	print "infds:", infds
-	print "outfds:", outfds
-	print "errfds:", errfds
-	
-	print "-----------------test2-----------------"
-	sock = AsynClientSocket()
-	try:
-		sock.connect('192.168.168.168', 80)
-	except socket.error, e:
-		print e
-		raw_input("test failed.")
-	
-	import select
-	sockfds = []
-	sockfds.append(sock.getFileNo())
-	(infds, outfds, errfds) = select.select(sockfds, sockfds, sockfds, 1)
-	sock.connector.elapse(1)
-	while not infds and not outfds and not errfds and not sock.connector.hasError(sock.status.get()):
-		print "1 second eclapse"
-		(infds, outfds, errfds) = select.select(sockfds, sockfds, sockfds, 1)
-		sock.connector.elapse(1)
-		
-	print "infds:", infds
-	print "outfds:", outfds
-	print "errfds:", errfds
-	raw_input("test ok.")
+#if __name__ == '__main__':
+#	import select
+#	print "-----------------test2-----------------"
+#	sock = AsynClientSocket()
+#	try:
+#		sock.connect('150.236.80.149', 9414)
+#	except socket.error, e:
+#		print e
+#		raw_input("test failed.")
+#	
+#
+#	sockfds = []
+#	sockfds.append(sock.getFileNo())
+#	(infds, outfds, errfds) = select.select(sockfds, sockfds, sockfds, 1)
+#	print "infds:", infds
+#	print "outfds:", outfds
+#	print "errfds:", errfds
+#	
+#	print "-----------------test2-----------------"
+#	sock = AsynClientSocket()
+#	try:
+#		sock.connect('192.168.168.168', 80)
+#	except socket.error, e:
+#		print e
+#		raw_input("test failed.")
+#	
+#	import select
+#	sockfds = []
+#	sockfds.append(sock.getFileNo())
+#	(infds, outfds, errfds) = select.select(sockfds, sockfds, sockfds, 1)
+#	sock.connector.elapse(1)
+#	while not infds and not outfds and not errfds and not sock.connector.hasError(sock.status.get()):
+#		print "1 second eclapse"
+#		(infds, outfds, errfds) = select.select(sockfds, sockfds, sockfds, 1)
+#		sock.connector.elapse(1)
+#		
+#	print "infds:", infds
+#	print "outfds:", outfds
+#	print "errfds:", errfds
+#	raw_input("test ok.")

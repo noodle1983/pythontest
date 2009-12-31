@@ -7,11 +7,13 @@ import CONST
 import traceback
 import time
 import pdb
+import socket
+import errno
 
 class Protocol:
 	def __init__(self):
 		self.msgCount = 1000
-		self.msgLen = 128 
+		self.msgLen = 1024 
 		self.datalen = self.msgCount * self.msgLen
 		self.beginTime = 0
 		self.recvCount = 0
@@ -41,8 +43,11 @@ class Protocol:
 			try:
 				con.send(sendArray[i%10], self.msgLen)
 				i += 1
-			except:
-				continue
+			except socket.error, e:
+				if e.errno == errno.ENOBUFS:
+					continue
+				print "[Protocol.handleConnected]" + str(e)
+				break	
 
 		endTime = time.time() 
 		print "time:%d, msgCount:%d, dataLen:%d, dataWrite:%d, tps:%d" % \
@@ -63,9 +68,9 @@ host = "127.0.0.1"
 port = 10000
 testTimeout = 30
 
-def testSend():
+def testSend(testId):
 	print '=' * 60
-	print '-' * 20, 'testSend', '-'* 20
+	print '-' * 20, 'testSend(', testId, ')',  '-'* 20
 	protocol = Protocol()
 	newSock = AsynClientSocket()
 
@@ -95,7 +100,7 @@ try:
 	manager.start()
 	
 	for i in range(0,1000):
-		testSend()
+		testSend(i)
 except:
 	print "-"*20 +  'Exception' + '-'* 20
 	print traceback.print_exc()

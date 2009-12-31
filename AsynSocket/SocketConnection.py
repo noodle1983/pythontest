@@ -97,7 +97,7 @@ class SocketConnection:
 			self.sock.recvImpl()
 			self.processor.process(self.fd + 1, self.protoHandleInput)
 		except socket.error, e:
-			self.reportError("[SocketConnection.recvImpl]recv error!") 
+			self.reportError("[SocketConnection.recvImpl]" + str(e)) 
 
 	def getFd(self):
 		try:
@@ -119,6 +119,7 @@ class SocketConnection:
 				self.reportError("[SocketConnection.genJobs]connecting error!")
 				return
 			if self.sock.connector.isConnected(self.status.get()):
+				print "[SocketConnection.genJobs]", self.sock.dump()
 				self.status.addStatus(CONST.STATUS_C)
 				self.handleConnected()
 
