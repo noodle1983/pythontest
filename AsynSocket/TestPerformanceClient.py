@@ -29,8 +29,9 @@ class Protocol:
 		#print "[Protocol.handleInput]", self.recvCount
 		if self.recvCount >= self.datalen:
 			self.endTime = time.time()
-			print "time:%d, msgCount:%d, dataLen:%d, recvLen:%d, sendLen:%d, tps:%d" % \
-				(self.endTime - self.beginTime, self.msgCount, self.datalen, self.recvCount, con.sendBuffer.totalRead, self.msgCount/(self.endTime - self.beginTime)) 
+			timeUsed = self.endTime - self.beginTime
+			print "time:%d, msgCount:%d, dataLen:%d, recvLen:%d, sendLen:%d, tps:%d, rate:%dk/s" % \
+				(timeUsed, self.msgCount, self.datalen, self.recvCount, con.sendBuffer.totalRead, self.msgCount/timeUsed, self.recvCount/timeUsed/1024) 
 			con.close()
 
 	def handleConnected(self, con):
@@ -75,10 +76,10 @@ def testSend(testId):
 	newSock = AsynClientSocket()
 
 	connection = SocketConnection(newSock, protocol, processor)
+	connection.connect(host, port)
+
 	manager.addConnection(newSock.getFileNo(), connection)
 	assert len(manager) == 1
-
-	connection.connect(host, port)
 
 	timeout = 0
 	while not connection.status.has(CONST.STATUS_UD) and timeout < testTimeout:
