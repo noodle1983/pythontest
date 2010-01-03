@@ -16,6 +16,8 @@ class ConnectionManager:
 		self.connections = {} 
 		self.lock = threading.RLock()
 
+		self.emptyLastTime = False
+
 	def __len__(self):
 		return len(self.connections)
 
@@ -60,10 +62,14 @@ class ConnectionManager:
 	def svc(self):
 		while self.running:
 			try:
+				if self.emptyLastTime:
+					time.sleep(0.001)
+
 				if self.select():
+					self.emptyLastTime = False
 					self.genJobs()
-				#else:
-				#	time.sleep(0.001)
+				else:
+					self.emptyLastTime = True
 			except Exception, e:
 				print "-"*20 +  'Exception' + '-'* 20
 				print e
