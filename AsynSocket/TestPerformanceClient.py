@@ -12,7 +12,7 @@ import errno
 
 class Protocol:
 	def __init__(self):
-		self.msgCount = 1000
+		self.msgCount = 10000
 		self.msgLen = 1024 
 		self.datalen = self.msgCount * self.msgLen
 		self.beginTime = 0
@@ -46,6 +46,7 @@ class Protocol:
 				i += 1
 			except socket.error, e:
 				if e.errno == errno.ENOBUFS:
+					time.sleep(0.001)
 					continue
 				print "[Protocol.handleConnected]" + str(e)
 				break	
@@ -67,7 +68,7 @@ processor = Processor(4)
 manager = ConnectionManager()
 host = "127.0.0.1"
 port = 10000
-testTimeout = 30
+testTimeout = 120
 
 def testSend(testId):
 	print '=' * 60

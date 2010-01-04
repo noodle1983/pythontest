@@ -7,6 +7,8 @@ import SocketStatus
 import CONST
 import traceback
 import time
+import socket
+import errno
 
 class Protocol:
 	def _init__(self):
@@ -18,9 +20,15 @@ class Protocol:
 	def handleInput(self, con): 
 		"Protocol.handleInput"
 		(buffer, len) = con.readRecvBuffer()
-		if len > 0:
+		while len > 0:
 			#print "[Protocol.handleInput]buffer:", buffer
-			con.send(buffer, len)
+			try:
+				con.send(buffer, len)
+				break
+			except socket.error, e:
+				if e.errno == errno.ENOBUFS:
+					continue
+				raise e
 
 	def handleConnected(self, con):
 		"Protocol.handleConnected"

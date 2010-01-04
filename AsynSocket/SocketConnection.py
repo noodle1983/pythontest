@@ -102,7 +102,7 @@ class SocketConnection:
 	def getFd(self):
 		try:
 			return self.sock.getFileNo()
-		except:
+		except socket.error, e:
 			self.reportError("[SocketConnection.getFd]bad file descriptor:" + str(e))
 			return 0
 	

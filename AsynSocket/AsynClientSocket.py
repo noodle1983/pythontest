@@ -73,6 +73,9 @@ class AsynClientSocket:
 	def initSock(self):
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setblocking(0)
+		self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 524288)
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 524288)
 		self.status = SocketStatus.SocketStatus()
 
 	def setBuffer(self, theRecvBuffer, theSendBuffer):
@@ -94,6 +97,9 @@ class AsynClientSocket:
 
 	def changeToServerConnection(self, theSock):
 		self.sock = theSock
+		self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 524288)
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 524288)
 		self.errorWhenRecvNone = True
 		self.status.addStatus(CONST.STATUS_C)
 
