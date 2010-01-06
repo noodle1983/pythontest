@@ -40,7 +40,7 @@ class TcpServer:
 	def init(self):
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.bind(('', self.port))
-		self.sock.listen(20000)
+		self.sock.listen(1000)
 		self.sock.setblocking(0)
 		#self.sock.settimeout(3)
 		self.connectionMan.addConnection(self.sock.fileno(), self)

@@ -17,6 +17,7 @@ class Thread:
 		self.cond = threading.Condition()
 		self.actionQueue = []
 		self.threadImpl = threading.Thread(target=self.svc)
+		self.lastAction = ""
 
 	def start(self):
 		self.status = THREAD_STATUS_RUNNING
@@ -46,6 +47,7 @@ class Thread:
 				if len(self.actionQueue) <= 0:
 					break
 				action = self.actionQueue.pop(0)	
+				self.lastAction = action.func_name
 			try:
 				action()	
 			except:
@@ -54,9 +56,11 @@ class Thread:
 
 				
 	def dump(self):
-		dumpStr = "Thread #%d\n" % self.threadImpl.ident
-		for action in self.actionQueue:
-			dumpStr += "\t%s\n" % action.func_name
+		dumpStr = "Thread #%d\n\tLastAction:%s\n\tActionLen:%d\n" % \
+			(self.threadImpl.ident, self.lastAction, len(self.actionQueue))
+		if self.actionQueue < 100:
+			for action in self.actionQueue:
+				dumpStr += "\t%s\n" % action.func_name
 		return dumpStr
 
 

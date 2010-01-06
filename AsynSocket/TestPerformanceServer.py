@@ -9,6 +9,7 @@ import traceback
 import time
 import socket
 import errno
+import pdb
 
 class Protocol:
 	def _init__(self):
@@ -19,15 +20,16 @@ class Protocol:
 
 	def handleInput(self, con): 
 		"Protocol.handleInput"
-		(buffer, len) = con.readRecvBuffer()
-		while len > 0:
+		(buffer, len) = con.preReadRecvBuffer()
+		if len > 0:
 			#print "[Protocol.handleInput]buffer:", buffer
 			try:
 				con.send(buffer, len)
-				break
+				con.cnfmPreReadRecvBuffer(len)
 			except socket.error, e:
 				if e.errno == errno.ENOBUFS:
-					continue
+					time.sleep(0.001)
+					return
 				raise e
 
 	def handleConnected(self, con):
@@ -61,9 +63,15 @@ def testListen():
 
 	server.startAt(port)
 	sleepTime = 3600 
-	while sleepTime > 0:
-		time.sleep(1)
-		sleepTime = sleepTime - 1
+	try:
+		while sleepTime > 0:
+			time.sleep(1)
+			sleepTime = sleepTime - 1
+	except:
+		print "-"*20 +  'Exception' + '-'* 20
+		print traceback.print_exc()
+		print "-"*20 + '---------' + '-'* 20
+		pdb.set_trace()
 
 	print '-' * 20, 'test done', '-' * 20
 	print '=' * 60

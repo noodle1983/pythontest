@@ -89,8 +89,20 @@ class SocketConnection:
 		try:
 			return self.recvBuffer.read()
 		except socket.error, e:
-			self.reportError("[SocketConnection.recv]send error!") 
+			self.reportError("[SocketConnection.readRecvBuffer]" + str(e)) 
+
+	def preReadRecvBuffer(self):
+		try:
+			return self.recvBuffer.read_reserve()
+		except socket.error, e:
+			self.reportError("[SocketConnection.preReadRecvBuffer]" + str(e)) 
 	
+	def cnfmPreReadRecvBuffer(self, cnfmLen):
+		try:
+			return self.recvBuffer.read_confirm(cnfmLen)
+		except socket.error, e:
+			self.reportError("[SocketConnection.confirmPreReadRecvBuffer]" + str(e)) 
+
 	def recvImpl(self):
 		"SocketConnection.recvImpl"
 		try:
@@ -125,6 +137,9 @@ class SocketConnection:
 
 		if self.sock.status.has(CONST.STATUS_RF):
 			self.processor.process(self.fd + 2, self.recvImpl)
+		elif self.sock.recvBuffer.dataLen() > 0:
+			self.processor.process(self.fd + 1, self.protoHandleInput)
+
 		if self.sock.status.has(CONST.STATUS_WF) and self.hasDataToSend():
 			self.processor.process(self.fd + 3, self.sendImpl)
 

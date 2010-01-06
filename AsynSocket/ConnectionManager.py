@@ -124,3 +124,8 @@ class ConnectionManager:
 			for con in self.connections.values():
 				con.genJobs()
 				
+	def dump(self):
+		dumpStr = ""
+		for con in self.connections.items():
+			dumpStr += con.dump()
+
