@@ -169,6 +169,8 @@ class AsynClientSocket:
 
 	def recvImpl(self):
 		"AsynClientSocket::recvImpl"
+		if self.status.has(CONST.STATUS_E):
+			return
 
 		buf = ""
 		recvLen = 0
