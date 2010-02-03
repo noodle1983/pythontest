@@ -39,14 +39,14 @@ class ConnectionManager:
 			newConnections = {}
 			for (fd, con) in self.connections.items():
 				if con.status.has(CONST.STATUS_UD):
+					print "[ConnectionManager.clean]clean fd:%d, addr:%s"% (fd, con.addr)
 					continue
 				if fd != con.getFd():
-					con.reportError("[ConnectionManager.clean]bad discriptor")
+					con.reportError("[ConnectionManager.clean]bad fd:%d, addr:%s"% (fd, con.addr))
 					continue
 				newConnections[fd] = con
 			self.connections = newConnections
-			#self.connections = \
-			#		dict([(k, v) for (k, v) in self.connections.items() if not v.status.has(CONST.STATUS_UD)])
+			print "[ConnectionManager.clean]fd after clean:%s" % self.connections.keys()
 
 	def start(self):
 		self.running = True

@@ -40,6 +40,9 @@ class SocketConnection:
 	def hasDataToSend(self):
 		return self.sendBuffer.dataLen() > 0
 
+	def isConnected(self):
+		return self.status.has(CONST.STATUS_C)
+
 	def dump(self):
 		return "[sock]%s\n[sendBuffer]%s\n[recvBuffer]%s\n"%\
 				(str(self.sock.dump()), str(self.sendBuffer.dump()), str(self.recvBuffer.dump()))
@@ -67,6 +70,8 @@ class SocketConnection:
 
 	def close(self):
 		try:
+			self.protoHandleConnected = None
+			self.protoHandleInput = None
 			self.sock.close()
 			self.proto.handleClose(self)
 		except socket.error, e:
@@ -80,6 +85,8 @@ class SocketConnection:
 		#self.status.addStatus(CONST.STATUS_D)
 	
 	def sendImpl(self):
+		if not self.status.has(CONST.STATUS_C):
+			print "SocketConnection.sendImpl", "not connected!"
 		try:
 			self.sock.sendImpl()
 		except:

@@ -16,11 +16,13 @@ class Protocol:
 		self.connection = theConnection
 
 	def handleInput(self, con): 
-		"Protocol.handleInput"
+		#"Protocol.handleInput"
 		(buffer, len) = con.readRecvBuffer()
-		print "[Protocol.handleInput]buffer:", buffer
+		#print "[Protocol.handleInput]buffer:", buffer
 		while True:
 			try:
+				if not con.isConnected():
+					break
 				con.send(buffer, len)
 				break
 			except:
@@ -43,13 +45,13 @@ class Protocol:
 processor = Processor(4)
 protocol = Protocol()
 server = TcpServer(protocol, processor)
-port = 8008
+port = 10000
 def testListen():
 	print '=' * 60
 	print '-' * 20, 'testListen', '-'* 20
 
 	server.startAt(port)
-	sleepTime = 60 
+	sleepTime = 6000 
 	while sleepTime > 0:
 		time.sleep(1)
 		sleepTime = sleepTime - 1
